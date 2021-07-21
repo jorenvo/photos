@@ -8,6 +8,21 @@ async function loadImage(loaded_imgs, url) {
     return img.decode().catch(() => console.error(`failed to decode ${url}`));
 }
 
+async function layout_row(row, height) {
+    if (!row.length) {
+        return;
+    }
+
+    const div = document.createElement("div");
+    while (row.length) {
+        const img = row.pop();
+        img.height = height;
+        div.appendChild(img);
+    }
+
+    document.body.appendChild(div);
+}
+
 async function layout(imgs) {
     const DESIRED_WIDTH_PX = 500;
     const MAX_ROW_HEIGHT_PX = 250;
@@ -22,19 +37,11 @@ async function layout(imgs) {
         const row_height = DESIRED_WIDTH_PX / total_width;
 
         if (row_height < MAX_ROW_HEIGHT_PX) {
-            console.log(`Row would be ${row_height}px`);
-            const div = document.createElement("div");
-
-            while (current_row.length) {
-                console.log(`Should be height: ${row_height}px`);
-                const img = current_row.pop();
-                img.height = row_height;
-                div.appendChild(img);
-            }
-
-            document.body.appendChild(div);
+            layout_row(current_row, row_height);
         }
     }
+
+    layout_row(current_row);
 }
 
 async function load() {
