@@ -28,20 +28,21 @@ async function layout(imgs) {
     const MAX_ROW_HEIGHT_PX = 250;
 
     let current_row = [];
+    let row_height = 0;
     for (const img of imgs) {
         current_row.push(img);
 
         // w = x, h = 1
         const aspect_ratios = current_row.map(img => img.naturalWidth / img.naturalHeight);
         const total_width = aspect_ratios.reduce((prev, curr) => prev + curr, 0);
-        const row_height = DESIRED_WIDTH_PX / total_width;
+        row_height = DESIRED_WIDTH_PX / total_width;
 
         if (row_height < MAX_ROW_HEIGHT_PX) {
             layout_row(current_row, row_height);
         }
     }
 
-    layout_row(current_row);
+    layout_row(current_row, row_height);
 }
 
 async function load() {
