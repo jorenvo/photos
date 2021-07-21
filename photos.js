@@ -1,10 +1,40 @@
-async function loadImage(url) {
+async function loadImage(loaded_imgs, url) {
     const blob = await (await fetch(url)).blob();
     const img = new Image();
-    // img.addEventListener("load", () => document.body.appendChild(img));
-    img.addEventListener("error", () => { console.error(`${url} failed to decode ${img}`); });
+    img.addEventListener("load", () => loaded_imgs.push(img));
     img.src = URL.createObjectURL(blob);
-    return img.decode().catch(() => console.error("error ignored?"));
+
+    // catch errors because Promise.all will bail on the first rejection
+    return img.decode().catch(() => console.error(`failed to decode ${url}`));
+}
+
+async function layout(imgs) {
+    const DESIRED_WIDTH_PX = 500;
+    const MAX_ROW_HEIGHT_PX = 250;
+
+    let current_row = [];
+    for (const img of imgs) {
+        current_row.push(img);
+
+        // w = x, h = 1
+        const aspect_ratios = current_row.map(img => img.naturalWidth / img.naturalHeight);
+        const total_width = aspect_ratios.reduce((prev, curr) => prev + curr, 0);
+        const row_height = DESIRED_WIDTH_PX / total_width;
+
+        if (row_height < MAX_ROW_HEIGHT_PX) {
+            console.log(`Row would be ${row_height}px`);
+            const div = document.createElement("div");
+
+            while (current_row.length) {
+                console.log(`Should be height: ${row_height}px`);
+                const img = current_row.pop();
+                img.height = row_height;
+                div.appendChild(img);
+            }
+
+            document.body.appendChild(div);
+        }
+    }
 }
 
 async function load() {
@@ -12,15 +42,16 @@ async function load() {
     const json = await response.json();
     console.table(json);
 
+    const loaded_imgs = [];
     const load_promises = [];
     for (const picture of json) {
-        // if (picture.name.endsWith(".jpeg"))
-        load_promises.push(loadImage(`https://www.jvo.sh/photos/${picture.name}`));
+        load_promises.push(loadImage(loaded_imgs, `https://www.jvo.sh/photos/${picture.name}`));
     }
 
-    console.log(load_promises);
     const loads = await Promise.all(load_promises);
-    console.log(loads);
+    console.log(loaded_imgs);
+
+    layout(loaded_imgs);
 }
 
 load();
