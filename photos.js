@@ -1,11 +1,17 @@
-async function loadImage(loaded_imgs, url) {
-    const blob = await (await fetch(url)).blob();
-    const img = new Image();
-    img.addEventListener("load", () => loaded_imgs.push(img));
-    img.src = URL.createObjectURL(blob);
+class Photo {
+    constructor(url) {
+        this.url = url;
+        this.fullURL = url.replace("_thumb", "");
+    }
 
-    // catch errors because Promise.all will bail on the first rejection
-    return img.decode().catch(() => console.error(`failed to decode ${url}`));
+    async load() {
+        const blob = await (await fetch(this.url)).blob();
+        this.img = new Image();
+        this.img.src = URL.createObjectURL(blob);
+
+        // catch errors because Promise.all will bail on the first rejection
+        return this.img.decode().catch(() => console.error(`failed to decode ${this.url}`));
+    }
 }
 
 async function layout_row(row, height) {
@@ -23,14 +29,19 @@ async function layout_row(row, height) {
     document.body.appendChild(div);
 }
 
-async function layout(imgs) {
+async function layout(photos) {
     const DESIRED_WIDTH_PX = 500;
     const MAX_ROW_HEIGHT_PX = 250;
 
     let current_row = [];
     let row_height = 0;
-    for (const img of imgs) {
-        current_row.push(img);
+    for (const photo of photos) {
+        // skip photos that failed to load
+        if (!photo.img.naturalHeight) {
+            continue;
+        }
+
+        current_row.push(photo.img);
 
         // w = x, h = 1
         const aspect_ratios = current_row.map(img => img.naturalWidth / img.naturalHeight);
@@ -50,16 +61,18 @@ async function load() {
     const json = await response.json();
     console.table(json);
 
-    const loaded_imgs = [];
+    const photos = [];
     const load_promises = [];
     for (const picture of json) {
-        load_promises.push(loadImage(loaded_imgs, `https://www.jvo.sh/photos/${picture.name}`));
+        if (picture.name.includes("_thumb")) {
+            const image = new Photo(`https://www.jvo.sh/photos/${picture.name}`);
+            photos.push(image);
+            load_promises.push(image.load());
+        }
     }
 
-    const loads = await Promise.all(load_promises);
-    console.log(loaded_imgs);
-
-    layout(loaded_imgs);
+    await Promise.all(load_promises);
+    layout(photos);
 }
 
 load();
