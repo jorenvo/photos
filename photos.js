@@ -13,9 +13,8 @@ class Photo {
     }
 
     async load() {
-        const blob = await (await fetch(this.url)).blob();
         this.img = new Image();
-        this.img.src = URL.createObjectURL(blob);
+        this.img.src = this.url;
 
         // catch errors because Promise.all will bail on the first rejection
         return this.img.decode().catch(() => console.error(`failed to decode ${this.url}`));
