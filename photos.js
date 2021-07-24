@@ -52,7 +52,7 @@ async function layout_row(photoRow, height, calculatedWidth) {
 
 async function layout(photos) {
     const target_width_px = window.innerWidth;
-    const MAX_ROW_HEIGHT_PX = window.innerHeight / 3;
+    const MAX_ROW_HEIGHT_PX = window.innerHeight / 2;
 
     document.body.innerHTML = "";
 
@@ -104,8 +104,17 @@ async function load() {
 load().then((photos) => {
     layout(photos);
     let timeout = 0;
+    let prevWidthPx = window.innerWidth;
     window.addEventListener("resize", () => {
         clearTimeout(timeout);
-        timeout = setTimeout(() => layout(photos), 100);
+        timeout = setTimeout(() => {
+            // Only re-layout when width has changed to avoid
+            // new layout when iOS Safari changes the height
+            // of the address bar.
+            if (prevWidthPx !== window.innerWidth) {
+                layout(photos);
+                prevWidthPx = window.innerWidth;
+            }
+        }, 100);
     });
 });
