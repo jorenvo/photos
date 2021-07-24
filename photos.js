@@ -1,8 +1,5 @@
 "use strict";
 
-// TODO:
-// Full res image, rotate, back. Should layout again.
-
 /* To deal with browser rendering differences in images with
  * fractional dimensions we cut of these right pixels of all
  * thumbnails.
@@ -103,7 +100,7 @@ async function load() {
 
 let prevWidthPx = window.innerWidth;
 let timeout = 0;
-function layoutIfWidthChanged() {
+function layoutIfWidthChanged(photos) {
     clearTimeout(timeout);
     timeout = setTimeout(() => {
         // Only re-layout when width has changed to avoid
@@ -118,6 +115,6 @@ function layoutIfWidthChanged() {
 
 load().then((photos) => {
     layout(photos);
-    window.addEventListener("resize", () => layoutIfWidthChanged());
-    window.addEventListener("load", () => layoutIfWidthChanged());
+    window.addEventListener("resize", () => layoutIfWidthChanged(photos));
+    window.addEventListener("load", () => layoutIfWidthChanged(photos));
 });
