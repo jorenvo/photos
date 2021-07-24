@@ -1,5 +1,11 @@
 "use strict";
 
+/* To deal with browser rendering differences in images with
+ * fractional dimensions we cut of these right pixels of all
+ * thumbnails.
+ * padding-left in row should be half of this */
+const RIGHT_BOX_CUT_PX = 4;
+
 class Photo {
     constructor(url) {
         this.url = url;
@@ -35,7 +41,7 @@ async function layout_row(photoRow, height, calculatedWidth) {
     }
 
     const rowDOM = document.createElement("row");
-    rowDOM.style.maxWidth = `${calculatedWidth - 4}px`;
+    rowDOM.style.maxWidth = `${calculatedWidth - RIGHT_BOX_CUT_PX}px`;
     while (photoRow.length) {
         const photo = photoRow.pop();
         rowDOM.appendChild(photo.toDOM(height));
