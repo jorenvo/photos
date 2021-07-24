@@ -2,7 +2,6 @@
 
 // TODO:
 // Full res image, rotate, back. Should layout again.
-// Order changes based on layout?
 
 /* To deal with browser rendering differences in images with
  * fractional dimensions we cut of these right pixels of all
@@ -102,20 +101,23 @@ async function load() {
     return photos;
 }
 
+let prevWidthPx = window.innerWidth;
+let timeout = 0;
+function layoutIfWidthChanged() {
+    clearTimeout(timeout);
+    timeout = setTimeout(() => {
+        // Only re-layout when width has changed to avoid
+        // new layout when iOS Safari changes the height
+        // of the address bar.
+        if (prevWidthPx !== window.innerWidth) {
+            layout(photos);
+            prevWidthPx = window.innerWidth;
+        }
+    }, 100);
+}
+
 load().then((photos) => {
     layout(photos);
-    let timeout = 0;
-    let prevWidthPx = window.innerWidth;
-    window.addEventListener("resize", () => {
-        clearTimeout(timeout);
-        timeout = setTimeout(() => {
-            // Only re-layout when width has changed to avoid
-            // new layout when iOS Safari changes the height
-            // of the address bar.
-            if (prevWidthPx !== window.innerWidth) {
-                layout(photos);
-                prevWidthPx = window.innerWidth;
-            }
-        }, 100);
-    });
+    window.addEventListener("resize", () => layoutIfWidthChanged());
+    window.addEventListener("load", () => layoutIfWidthChanged());
 });
