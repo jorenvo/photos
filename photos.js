@@ -81,7 +81,7 @@ async function layout(photos) {
 }
 
 async function load() {
-    const response = await fetch("https://www.jvo.sh/photos/");
+    const response = await fetch("https://www.jvo.sh/photos_content/");
     const json = await response.json();
     console.table(json);
 
@@ -89,7 +89,7 @@ async function load() {
     const load_promises = [];
     for (const picture of json) {
         if (picture.name.includes("_thumb")) {
-            const image = new Photo(`https://www.jvo.sh/photos/${picture.name}`);
+            const image = new Photo(`https://www.jvo.sh/photos_content/${picture.name}`);
             photos.push(image);
             load_promises.push(image.load());
         }
