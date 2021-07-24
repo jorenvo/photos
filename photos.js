@@ -35,11 +35,22 @@ async function layout_row(photoRow, height) {
     }
 
     const div = document.createElement("div");
+    let totalWidth = 0;
     while (photoRow.length) {
         const photo = photoRow.pop();
         div.appendChild(photo.toDOM(height));
+        const expectedWidth = photo.img.naturalWidth / photo.img.naturalHeight * Math.round(height);
+        console.log(`expected width ${expectedWidth}, height ${height}`);
+        totalWidth += expectedWidth;
+        if (photoRow.length === 0) {
+            console.log(`Last width is ${expectedWidth}, total is now ${totalWidth}`);
+
+            // Chrome floors this when rendering?
+            div.lastChild.firstChild.style.width = `${(expectedWidth + 500 - totalWidth).toFixed(2)}px`;
+        }
     }
 
+    // console.log(`totalWidth is ${totalWidth}`);
     document.body.appendChild(div);
 }
 
@@ -47,6 +58,7 @@ async function layout(photos) {
     const DESIRED_WIDTH_PX = 500;
     const MAX_ROW_HEIGHT_PX = 250;
 
+    console.log("layout");
     let current_row = [];
     let row_height = 0;
     for (const photo of photos) {
@@ -62,11 +74,14 @@ async function layout(photos) {
         row_height = DESIRED_WIDTH_PX / total_width;
 
         if (row_height < MAX_ROW_HEIGHT_PX) {
+            // console.log(`scaled width ${total_width * row_height}, expected ${DESIRED_WIDTH_PX}`);
             layout_row(current_row, row_height);
         }
     }
 
-    layout_row(current_row, row_height);
+    if (current_row.length) {
+        layout_row(current_row, row_height);
+    }
 }
 
 async function load() {
