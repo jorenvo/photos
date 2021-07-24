@@ -46,7 +46,7 @@ async function layout_row(photoRow, height, calculatedWidth) {
 
 async function layout(photos) {
     const target_width_px = window.innerWidth;
-    const MAX_ROW_HEIGHT_PX = 250;
+    const MAX_ROW_HEIGHT_PX = window.innerHeight / 3;
 
     document.body.innerHTML = "";
 
@@ -54,7 +54,7 @@ async function layout(photos) {
     let current_row = [];
     let row_height = 0;
     for (const photo of photos) {
-        if (!photo.loaded) {
+        if (!photo.loaded()) {
             continue;
         }
 
