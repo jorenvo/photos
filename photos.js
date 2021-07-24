@@ -13,7 +13,7 @@ class Photo {
     }
 
     async load() {
-        const blob = await (await fetch(this.url)).blob();
+        const blob = await (await fetch(this.url, { cache: "no-cache" })).blob();
         this.img = new Image();
         this.img.src = URL.createObjectURL(blob);
 
