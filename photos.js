@@ -29,12 +29,13 @@ class Photo {
     }
 }
 
-async function layout_row(photoRow, height) {
+async function layout_row(photoRow, height, calculatedWidth) {
     if (!photoRow.length) {
         return;
     }
 
     const rowDOM = document.createElement("row");
+    rowDOM.style.maxWidth = `${calculatedWidth - 4}px`;
     while (photoRow.length) {
         const photo = photoRow.pop();
         rowDOM.appendChild(photo.toDOM(height));
@@ -44,8 +45,10 @@ async function layout_row(photoRow, height) {
 }
 
 async function layout(photos) {
-    const DESIRED_WIDTH_PX = 500;
+    const target_width_px = window.innerWidth;
     const MAX_ROW_HEIGHT_PX = 250;
+
+    document.body.innerHTML = "";
 
     console.log("layout");
     let current_row = [];
@@ -60,15 +63,15 @@ async function layout(photos) {
         // w = x, h = 1
         const aspect_ratios = current_row.map(photo => photo.img.naturalWidth / photo.img.naturalHeight);
         const total_width = aspect_ratios.reduce((prev, curr) => prev + curr, 0);
-        row_height = DESIRED_WIDTH_PX / total_width;
+        row_height = target_width_px / total_width;
 
         if (row_height < MAX_ROW_HEIGHT_PX) {
-            layout_row(current_row, row_height);
+            layout_row(current_row, row_height, target_width_px);
         }
     }
 
     if (current_row.length) {
-        layout_row(current_row, row_height);
+        layout_row(current_row, row_height, target_width_px);
     }
 }
 
@@ -89,6 +92,14 @@ async function load() {
 
     await Promise.all(load_promises);
     layout(photos);
+    return photos;
 }
 
-load();
+load().then((photos) => {
+    layout(photos);
+    let timeout = 0;
+    window.addEventListener("resize", () => {
+        clearTimeout(timeout);
+        timeout = setTimeout(() => layout(photos), 100);
+    });
+});

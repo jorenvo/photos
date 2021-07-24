@@ -13,7 +13,7 @@
  * than the desired size. */
 row {
   display: block; /* appear on new line */
-  max-width: 499px;
+  max-width: 99%;
   overflow: hidden; /* hide anything that doesn't fit */
   white-space: nowrap; /* don't wrap photos if they don't fit in max-width */
 }
