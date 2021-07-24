@@ -4,16 +4,22 @@
   line-height: 0;
 }
 
-/* img { */
-/*   padding: 1px; */
-/* } */
+/* Photos will have gaps twice this size. */
+img {
+  padding: 1px;
+}
+
+/* Already padding the parent row. */
+row a:first-child img {
+  padding-left: 0px;
+}
 
 /* Browsers round fractional dimensions of pixels differently.
  * To avoid ugly off by one errors cut out a box slighly smaller
  * than the desired size. */
 row {
-  display: block; /* appear on new line */
-  overflow: hidden; /* hide anything that doesn't fit */
-  white-space: nowrap; /* don't wrap photos if they don't fit in max-width */
+  display: block; /* Appear on new line. */
+  overflow: hidden; /* Hide anything that doesn't fit. */
+  white-space: nowrap; /* Don't wrap photos if they don't fit in max-width. */
   padding-left: 2px;
 }

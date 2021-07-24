@@ -56,7 +56,6 @@ async function layout(photos) {
 
     document.body.innerHTML = "";
 
-    console.log("layout");
     let current_row = [];
     let row_height = 0;
     for (const photo of photos) {
