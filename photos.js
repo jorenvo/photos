@@ -1,5 +1,9 @@
 "use strict";
 
+// TODO:
+// Full res image, rotate, back. Should layout again.
+// Order changes based on layout?
+
 /* To deal with browser rendering differences in images with
  * fractional dimensions we cut of these right pixels of all
  * thumbnails.
@@ -95,7 +99,6 @@ async function load() {
     }
 
     await Promise.all(load_promises);
-    layout(photos);
     return photos;
 }
 
