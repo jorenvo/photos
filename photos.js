@@ -45,8 +45,7 @@ async function layout_row(photoRow, height, calculatedWidth) {
 
     const rowDOM = document.createElement("row");
     rowDOM.style.maxWidth = `${calculatedWidth - RIGHT_BOX_CUT_PX}px`;
-    while (photoRow.length) {
-        const photo = photoRow.pop();
+    for (const photo of photoRow) {
         rowDOM.appendChild(photo.toDOM(height));
     }
 
@@ -75,6 +74,7 @@ async function layout(photos) {
 
         if (row_height < MAX_ROW_HEIGHT_PX) {
             layout_row(current_row, row_height, target_width_px);
+            current_row = [];
         }
     }
 
