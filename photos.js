@@ -49,10 +49,14 @@ class Video {
 
     async load() {
         this.video = document.createElement("video");
-        this.video.autoplay = "1";
-        this.video.loop = "1";
-        this.video.muted = "1";
-        this.video.src = this.url;
+
+        // setAttribute instead of e.g. this.video.muted = "1", because that doesn't
+        // work for all these attributes.
+        this.video.setAttribute("src", this.url);
+        this.video.setAttribute("autoplay", "1");
+        this.video.setAttribute("loop", "1");
+        this.video.setAttribute("muted", "1");
+        this.video.setAttribute("playsinline", "1"); // Needed to play on iOS Safari
 
         return new Promise((resolve, reject) => {
             this.video.addEventListener("loadeddata", () => {
