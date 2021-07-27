@@ -24,6 +24,14 @@ class Photo {
         return !!this.img.naturalHeight;
     }
 
+    getWidth() {
+        return this.img.naturalWidth;
+    }
+
+    getHeight() {
+        return this.img.naturalHeight;
+    }
+
     toDOM(height) {
         this.img.height = height;
 
@@ -34,21 +42,60 @@ class Photo {
     }
 }
 
-async function layout_row(photoRow, height, calculatedWidth) {
-    if (!photoRow.length) {
+class Video {
+    constructor(url) {
+        this.url = url;
+    }
+
+    async load() {
+        this.video = document.createElement("video");
+        this.video.autoplay = "1";
+        this.video.loop = "1";
+        this.video.muted = "1";
+        this.video.src = this.url;
+
+        return new Promise((resolve, reject) => {
+            this.video.addEventListener("loadeddata", () => {
+                console.log(`Got new state: ${this.video.readyState}`);
+                console.log(`Dimensions after loading: ${this.video.videoWidth}x${this.video.videoHeight}`);
+                resolve();
+            });
+        });
+    }
+
+    loaded() {
+        return true;
+    }
+
+    getWidth() {
+        return this.video.videoWidth;
+    }
+
+    getHeight() {
+        return this.video.videoHeight;
+    }
+
+    toDOM(height) {
+        this.video.height = height;
+        return this.video;
+    }
+}
+
+async function layout_row(mediaRow, height, calculatedWidth) {
+    if (!mediaRow.length) {
         return;
     }
 
     const rowDOM = document.createElement("row");
     rowDOM.style.maxWidth = `${calculatedWidth - RIGHT_BOX_CUT_PX}px`;
-    for (const photo of photoRow) {
-        rowDOM.appendChild(photo.toDOM(height));
+    for (const media of mediaRow) {
+        rowDOM.appendChild(media.toDOM(height));
     }
 
     document.body.appendChild(rowDOM);
 }
 
-async function layout(photos) {
+async function layout(medias) {
     const target_width_px = window.innerWidth;
     const MAX_ROW_HEIGHT_PX = window.innerHeight / 2;
 
@@ -56,15 +103,15 @@ async function layout(photos) {
 
     let current_row = [];
     let row_height = 0;
-    for (const photo of photos) {
-        if (!photo.loaded()) {
+    for (const media of medias) {
+        if (!media.loaded()) {
             continue;
         }
 
-        current_row.push(photo);
+        current_row.push(media);
 
         // w = x, h = 1
-        const aspect_ratios = current_row.map(photo => photo.img.naturalWidth / photo.img.naturalHeight);
+        const aspect_ratios = current_row.map(media => media.getWidth() / media.getHeight());
         const total_width = aspect_ratios.reduce((prev, curr) => prev + curr, 0);
         row_height = target_width_px / total_width;
 
@@ -84,37 +131,41 @@ async function load() {
     const json = await response.json();
     console.table(json);
 
-    const photos = [];
+    const medias = [];
     const load_promises = [];
-    for (const picture of json) {
-        if (picture.name.includes("_thumb")) {
-            const image = new Photo(`https://www.jvo.sh/photos_content/${picture.name}`);
-            photos.push(image);
+    for (const media of json) {
+        if (media.name.includes("_thumb")) {
+            const image = new Photo(`https://www.jvo.sh/photos_content/${media.name}`);
+            medias.push(image);
             load_promises.push(image.load());
+        } else if (media.name.includes(".mp4")) {
+            const video = new Video(`https://www.jvo.sh/photos_content/${media.name}`);
+            medias.push(video);
+            load_promises.push(video.load());
         }
     }
 
     await Promise.all(load_promises);
-    return photos;
+    return medias;
 }
 
 let prevWidthPx = window.innerWidth;
 let timeout = 0;
-function layoutIfWidthChanged(photos) {
+function layoutIfWidthChanged(medias) {
     clearTimeout(timeout);
     timeout = setTimeout(() => {
         // Only re-layout when width has changed to avoid
         // new layout when iOS Safari changes the height
         // of the address bar.
         if (prevWidthPx !== window.innerWidth) {
-            layout(photos);
+            layout(medias);
             prevWidthPx = window.innerWidth;
         }
     }, 100);
 }
 
-load().then((photos) => {
-    layout(photos);
-    window.addEventListener("resize", () => layoutIfWidthChanged(photos));
-    window.addEventListener("load", () => layoutIfWidthChanged(photos));
+load().then((medias) => {
+    layout(medias);
+    window.addEventListener("resize", () => layoutIfWidthChanged(medias));
+    window.addEventListener("load", () => layoutIfWidthChanged(medias));
 });

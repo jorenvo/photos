@@ -5,12 +5,13 @@
 }
 
 /* Photos will have gaps twice this size. */
-img {
+img, video {
   padding: 1px;
 }
 
 /* Already padding the parent row. */
-row a:first-child img {
+row a:first-child img,
+row a:first-child video {
   padding-left: 0px;
 }
 
