@@ -56,6 +56,8 @@ class Video {
         this.video.setAttribute("autoplay", "1");
         this.video.setAttribute("loop", "1");
         this.video.setAttribute("muted", "1");
+	
+	this.video.muted = true; // This is needed to unblock autoplay in Firefox 90
         this.video.setAttribute("playsinline", "1"); // Needed to play on iOS Safari
 
         return new Promise((resolve, reject) => {
@@ -107,11 +109,7 @@ async function layout(medias) {
 
     let current_row = [];
     let row_height = 0;
-    for (const media of medias) {
-        if (!media.loaded()) {
-            continue;
-        }
-
+    medias.filter(media => media.loaded()).forEach((media, i) => {
         current_row.push(media);
 
         // w = x, h = 1
@@ -119,11 +117,12 @@ async function layout(medias) {
         const total_width = aspect_ratios.reduce((prev, curr) => prev + curr, 0);
         row_height = target_width_px / total_width;
 
-        if (row_height < MAX_ROW_HEIGHT_PX) {
+	// Create new row only if there's >2 photos left. This avoids large photos at the end.
+        if (row_height < MAX_ROW_HEIGHT_PX && i < medias.length - 3) {
             layout_row(current_row, row_height, target_width_px);
             current_row = [];
         }
-    }
+    });
 
     if (current_row.length) {
         layout_row(current_row, row_height, target_width_px);
