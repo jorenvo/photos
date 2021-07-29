@@ -5,7 +5,8 @@
 }
 
 /* Photos will have gaps twice this size. */
-img, video {
+img,
+video {
   padding: 1px;
 }
 
