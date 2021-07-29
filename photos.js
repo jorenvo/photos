@@ -145,16 +145,13 @@ async function load() {
   const medias = [];
   const load_promises = [];
   for (const media of json) {
+    const url = `https://www.jvo.sh/photos_content/${media.name}`;
     if (media.name.includes("_thumb")) {
-      const image = new Photo(
-        `https://www.jvo.sh/photos_content/${media.name}`
-      );
+      const image = new Photo(url);
       medias.push(image);
       load_promises.push(image.load());
     } else if (media.name.includes(".mp4")) {
-      const video = new Video(
-        `https://www.jvo.sh/photos_content/${media.name}`
-      );
+      const video = new Video(url);
       medias.push(video);
       load_promises.push(video.load());
     }
