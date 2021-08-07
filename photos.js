@@ -91,76 +91,88 @@ class Video {
   }
 }
 
-async function layout_row(mediaRow, height, calculatedWidth) {
-  if (!mediaRow.length) {
-    return;
+class LayoutEngine {
+  constructor() {
+    this.all = [];
+    this.to_layout = [];
   }
 
-  const rowDOM = document.createElement("row");
-  rowDOM.style.maxWidth = `${calculatedWidth - RIGHT_BOX_CUT_PX}px`;
-  for (const media of mediaRow) {
-    rowDOM.appendChild(media.toDOM(height));
+  clear() {
+    document.body.innerHTML = "";
   }
 
-  document.body.appendChild(rowDOM);
+  add_media(media) {
+    this.all.push(media);
+    this.to_layout.push(media);
+  }
+
+  relayout() {
+    this.clear();
+    for (let media of this.all) {
+      this.to_layout.push(media);
+      this.layout();
+    }
+  }
+
+  layout_row(height, calculatedWidth) {
+    if (!this.to_layout.length) {
+      return;
+    }
+
+    const rowDOM = document.createElement("row");
+    rowDOM.style.maxWidth = `${calculatedWidth - RIGHT_BOX_CUT_PX}px`;
+    for (const media of this.to_layout) {
+      rowDOM.appendChild(media.toDOM(height));
+    }
+
+    document.body.appendChild(rowDOM);
+  }
+
+  layout() {
+    const target_width_px = window.innerWidth;
+    const MAX_ROW_HEIGHT_PX = window.innerHeight / 2;
+
+    let row_height = 0;
+    // w = x, h = 1
+    const aspect_ratios = this.to_layout.map(
+      (media) => media.getWidth() / media.getHeight()
+    );
+    const total_width = aspect_ratios.reduce((prev, curr) => prev + curr, 0);
+    row_height = target_width_px / total_width;
+
+    if (row_height < MAX_ROW_HEIGHT_PX) {
+      this.layout_row(row_height, target_width_px);
+      this.to_layout = [];
+    }
+  }
 }
 
-async function layout(medias) {
-  const target_width_px = window.innerWidth;
-  const MAX_ROW_HEIGHT_PX = window.innerHeight / 2;
-
-  document.body.innerHTML = "";
-
-  let current_row = [];
-  let row_height = 0;
-  medias
-    .filter((media) => media.loaded())
-    .forEach((media, i) => {
-      current_row.push(media);
-
-      // w = x, h = 1
-      const aspect_ratios = current_row.map(
-        (media) => media.getWidth() / media.getHeight()
-      );
-      const total_width = aspect_ratios.reduce((prev, curr) => prev + curr, 0);
-      row_height = target_width_px / total_width;
-
-      // Create new row only if there's >2 photos left. This avoids large photos at the end.
-      if (row_height < MAX_ROW_HEIGHT_PX && i < medias.length - 3) {
-        layout_row(current_row, row_height, target_width_px);
-        current_row = [];
-      }
-    });
-
-  if (current_row.length) {
-    layout_row(current_row, row_height, target_width_px);
-  }
-}
-
-async function load() {
+async function load(layout_engine) {
   const response = await fetch("https://www.jvo.sh/photos_content/");
   const json = await response.json();
   console.table(json);
 
   const medias = [];
-  const load_promises = [];
-  for (const media of json) {
-    const url = `https://www.jvo.sh/photos_content/${media.name}`;
-    if (media.name.includes("_thumb")) {
-      const image = new Photo(url);
-      medias.push(image);
-      load_promises.push(image.load());
-    } else if (media.name.includes(".mp4")) {
-      const video = new Video(url);
-      medias.push(video);
-      load_promises.push(video.load());
+  for (const metadata of json) {
+    const url = `https://www.jvo.sh/photos_content/${metadata.name}`;
+    let media;
+    if (metadata.name.includes("_thumb")) {
+      media = new Photo(url);
+    } else if (metadata.name.includes(".mp4")) {
+      media = new Video(url);
+    }
+
+    if (media) {
+      medias.push(media);
+      await media.load();
+
+      layout_engine.add_media(media);
+      layout_engine.layout();
     }
   }
-
-  await Promise.all(load_promises);
-  return medias;
 }
 
+const layoutEngine = new LayoutEngine();
 let prevWidthPx = window.innerWidth;
 let timeout = 0;
 function layoutIfWidthChanged(medias) {
@@ -170,14 +182,12 @@ function layoutIfWidthChanged(medias) {
     // new layout when iOS Safari changes the height
     // of the address bar.
     if (prevWidthPx !== window.innerWidth) {
-      layout(medias);
+      layoutEngine.relayout();
       prevWidthPx = window.innerWidth;
     }
   }, 100);
 }
 
-load().then((medias) => {
-  layout(medias);
-  window.addEventListener("resize", () => layoutIfWidthChanged(medias));
-  window.addEventListener("load", () => layoutIfWidthChanged(medias));
-});
+load(layoutEngine);
+window.addEventListener("resize", () => layoutIfWidthChanged());
+window.addEventListener("load", () => layoutIfWidthChanged());
