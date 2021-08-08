@@ -50,7 +50,7 @@ class Photo extends Media {
     // catch errors because Promise.all will bail on the first rejection
     return highres_image
       .decode()
-      .then(() => this.img = highres_image)
+      .then(() => (this.img = highres_image))
       .catch(() => console.error(`failed to decode ${this.highres_thumb_url}`));
   }
 
