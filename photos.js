@@ -223,7 +223,7 @@ function layoutIfWidthChanged(medias) {
       layout(medias);
       prevWidthPx = window.innerWidth;
     }
-  }, 100);
+  }, 200);
 }
 
 load().then((medias) => {
