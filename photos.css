@@ -4,6 +4,10 @@
   line-height: 0;
 }
 
+.blur {
+  filter: blur(1px);
+}
+
 /* Photos will have gaps twice this size. */
 img,
 video {

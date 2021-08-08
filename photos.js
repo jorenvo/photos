@@ -6,20 +6,51 @@
  * padding-left in row should be half of this */
 const RIGHT_BOX_CUT_PX = 4;
 
-class Photo {
+class Media {
   constructor(url) {
-    this.url = url;
-    this.fullURL = url.replace("_thumb", "").replace(".webp", ".jpeg");
+    this.dom = null;
+    this.dom_height = 0;
+  }
+
+  setDOMHeight(height) {
+    this.dom_height = height;
+  }
+
+  getDOM() {
+    return this.dom;
+  }
+
+  setDOM(dom) {
+    this.dom = dom;
+  }
+}
+
+class Photo extends Media {
+  constructor(url) {
+    super();
+    this.thumb_url = url;
+    this.highres_thumb_url = url.replace("_low_thumb", "_thumb");
+    this.full_url = url.replace("_low_thumb", "").replace(".webp", ".jpeg");
   }
 
   async load() {
     this.img = new Image();
-    this.img.src = this.url;
+    this.img.src = this.thumb_url;
 
     // catch errors because Promise.all will bail on the first rejection
     return this.img
       .decode()
-      .catch(() => console.error(`failed to decode ${this.url}`));
+      .catch(() => console.error(`failed to decode ${this.thumb_url}`));
+  }
+
+  async load_highres_thumbnail() {
+    this.img = new Image();
+    this.img.src = this.highres_thumb_url;
+
+    // catch errors because Promise.all will bail on the first rejection
+    return this.img
+      .decode()
+      .catch(() => console.error(`failed to decode ${this.highres_thumb_url}`));
   }
 
   loaded() {
@@ -34,18 +65,23 @@ class Photo {
     return this.img.naturalHeight;
   }
 
-  toDOM(height) {
-    this.img.height = height;
+  toDOM() {
+    this.img.height = this.dom_height;
+    if (this.img.src === this.thumb_url) {
+      this.img.classList.add("blur");
+    }
 
     const a = document.createElement("a");
-    a.href = this.fullURL;
+    a.href = this.full_url;
     a.appendChild(this.img);
+    this.setDOM(a);
     return a;
   }
 }
 
-class Video {
+class Video extends Media {
   constructor(url) {
+    super();
     this.url = url;
   }
 
@@ -73,6 +109,10 @@ class Video {
     });
   }
 
+  async load_highres_thumbnail() {
+    return Promise.resolve();
+  }
+
   loaded() {
     return true;
   }
@@ -86,93 +126,90 @@ class Video {
   }
 
   toDOM(height) {
-    this.video.height = height;
+    this.video.height = this.dom_height;
+    this.setDOM(this.video);
     return this.video;
   }
 }
 
-class LayoutEngine {
-  constructor() {
-    this.all = [];
-    this.to_layout = [];
+async function layout_row(mediaRow, height, calculatedWidth) {
+  if (!mediaRow.length) {
+    return;
   }
 
-  clear() {
-    document.body.innerHTML = "";
+  const rowDOM = document.createElement("row");
+  rowDOM.style.maxWidth = `${calculatedWidth - RIGHT_BOX_CUT_PX}px`;
+  for (const media of mediaRow) {
+    media.setDOMHeight(height);
+    rowDOM.appendChild(media.toDOM());
   }
 
-  add_media(media) {
-    this.all.push(media);
-    this.to_layout.push(media);
-  }
+  document.body.appendChild(rowDOM);
+}
 
-  relayout() {
-    this.clear();
-    for (let media of this.all) {
-      this.to_layout.push(media);
-      this.layout();
-    }
-  }
+async function layout(medias) {
+  const target_width_px = window.innerWidth;
+  const MAX_ROW_HEIGHT_PX = window.innerHeight / 2;
 
-  layout_row(height, calculatedWidth) {
-    if (!this.to_layout.length) {
-      return;
-    }
+  document.body.innerHTML = "";
 
-    const rowDOM = document.createElement("row");
-    rowDOM.style.maxWidth = `${calculatedWidth - RIGHT_BOX_CUT_PX}px`;
-    for (const media of this.to_layout) {
-      rowDOM.appendChild(media.toDOM(height));
-    }
+  let current_row = [];
+  let row_height = 0;
+  medias
+    .filter((media) => media.loaded())
+    .forEach((media, i) => {
+      current_row.push(media);
 
-    document.body.appendChild(rowDOM);
-  }
+      // w = x, h = 1
+      const aspect_ratios = current_row.map(
+        (media) => media.getWidth() / media.getHeight()
+      );
+      const total_width = aspect_ratios.reduce((prev, curr) => prev + curr, 0);
+      row_height = target_width_px / total_width;
 
-  layout() {
-    const target_width_px = window.innerWidth;
-    const MAX_ROW_HEIGHT_PX = window.innerHeight / 2;
+      // Create new row only if there's >2 photos left. This avoids large photos at the end.
+      if (row_height < MAX_ROW_HEIGHT_PX && i < medias.length - 3) {
+        layout_row(current_row, row_height, target_width_px);
+        current_row = [];
+      }
+    });
 
-    let row_height = 0;
-    // w = x, h = 1
-    const aspect_ratios = this.to_layout.map(
-      (media) => media.getWidth() / media.getHeight()
-    );
-    const total_width = aspect_ratios.reduce((prev, curr) => prev + curr, 0);
-    row_height = target_width_px / total_width;
-
-    if (row_height < MAX_ROW_HEIGHT_PX) {
-      this.layout_row(row_height, target_width_px);
-      this.to_layout = [];
-    }
+  if (current_row.length) {
+    layout_row(current_row, row_height, target_width_px);
   }
 }
 
-async function load(layout_engine) {
-  const response = await fetch("https://www.jvo.sh/photos_content/");
+async function load() {
+  const response = await fetch("https://www.jvo.sh/photos_dev_content/");
   const json = await response.json();
-  console.table(json);
 
   const medias = [];
-  for (const metadata of json) {
-    const url = `https://www.jvo.sh/photos_content/${metadata.name}`;
-    let media;
-    if (metadata.name.includes("_thumb")) {
-      media = new Photo(url);
-    } else if (metadata.name.includes(".mp4")) {
-      media = new Video(url);
-    }
-
-    if (media) {
-      medias.push(media);
-      await media.load();
-
-      layout_engine.add_media(media);
-      layout_engine.layout();
+  const load_promises = [];
+  for (const media of json) {
+    const url = `https://www.jvo.sh/photos_dev_content/${media.name}`;
+    if (media.name.includes("_low_thumb")) {
+      const image = new Photo(url);
+      medias.push(image);
+      load_promises.push(image.load());
+    } else if (media.name.includes(".mp4")) {
+      const video = new Video(url);
+      medias.push(video);
+      load_promises.push(video.load());
     }
   }
+
+  await Promise.all(load_promises);
+  return medias;
 }
 
-const layoutEngine = new LayoutEngine();
+function load_highres(medias) {
+  medias.forEach((media) => {
+    media.load_highres_thumbnail().then(() => {
+      media.getDOM().replaceWith(media.toDOM());
+    });
+  });
+}
+
 let prevWidthPx = window.innerWidth;
 let timeout = 0;
 function layoutIfWidthChanged(medias) {
@@ -182,12 +219,15 @@ function layoutIfWidthChanged(medias) {
     // new layout when iOS Safari changes the height
     // of the address bar.
     if (prevWidthPx !== window.innerWidth) {
-      layoutEngine.relayout();
+      layout(medias);
       prevWidthPx = window.innerWidth;
     }
   }, 100);
 }
 
-load(layoutEngine);
-window.addEventListener("resize", () => layoutIfWidthChanged());
-window.addEventListener("load", () => layoutIfWidthChanged());
+load().then((medias) => {
+  layout(medias);
+  load_highres(medias);
+  window.addEventListener("resize", () => layoutIfWidthChanged(medias));
+  window.addEventListener("load", () => layoutIfWidthChanged(medias));
+});
