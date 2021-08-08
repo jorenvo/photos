@@ -44,12 +44,13 @@ class Photo extends Media {
   }
 
   async load_highres_thumbnail() {
-    this.img = new Image();
-    this.img.src = this.highres_thumb_url;
+    const highres_image = new Image();
+    highres_image.src = this.highres_thumb_url;
 
     // catch errors because Promise.all will bail on the first rejection
-    return this.img
+    return highres_image
       .decode()
+      .then(() => this.img = highres_image)
       .catch(() => console.error(`failed to decode ${this.highres_thumb_url}`));
   }
 
