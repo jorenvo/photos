@@ -22,4 +22,4 @@ for IMG in "${DIR}"/*; do
 done
 
 echo "Caching photos json..."
-curl -s https://www.jvo.sh/photos_dev_content/ > "${DIR}/photos.json"
+curl -s https://www.jvo.sh/photos_content/ > "${DIR}/photos.json"
