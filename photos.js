@@ -181,7 +181,7 @@ async function layout(medias) {
 }
 
 async function load() {
-  const endpoint = "https://www.jvo.sh/photos_dev_content";
+  const endpoint = "https://www.jvo.sh/photos_content";
   const response = await fetch(`${endpoint}/photos.json`);
   const json = await response.json();
 
