@@ -205,11 +205,16 @@ async function load() {
 }
 
 function load_highres(medias) {
-  medias.forEach((media) => {
-    media.load_highres_thumbnail().then(() => {
-      media.getDOM().replaceWith(media.toDOM());
-    });
-  });
+  let loads = [];
+  for (const media of medias) {
+    loads.push(
+      media
+        .load_highres_thumbnail()
+        .then(() => media.getDOM().replaceWith(media.toDOM()))
+    );
+  }
+
+  return Promise.all(loads);
 }
 
 let prevWidthPx = window.innerWidth;
@@ -227,9 +232,16 @@ function layoutIfWidthChanged(medias) {
   }, 200);
 }
 
-load().then((medias) => {
+load().then(async (medias) => {
   layout(medias);
-  load_highres(medias);
   window.addEventListener("resize", () => layoutIfWidthChanged(medias));
   window.addEventListener("load", () => layoutIfWidthChanged(medias));
+
+  await load_highres(medias);
+
+  // The low res thumbnails are resized very small. This causes
+  // rounding issues in their dimensions compared to their full
+  // resolution counterparts. To fix this re-layout everything when we
+  // have all the high res media.
+  layout(medias);
 });
