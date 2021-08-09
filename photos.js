@@ -181,15 +181,14 @@ async function layout(medias) {
 }
 
 async function load() {
-  const response = await fetch(
-    "https://www.jvo.sh/photos_dev_content/photos.json"
-  );
+  const endpoint = "https://www.jvo.sh/photos_dev_content";
+  const response = await fetch(`${endpoint}/photos.json`);
   const json = await response.json();
 
   const medias = [];
   const load_promises = [];
   for (const media of json) {
-    const url = `https://www.jvo.sh/photos_dev_content/${media.name}`;
+    const url = `${endpoint}/${media.name}`;
     if (media.name.includes("_low_thumb")) {
       const image = new Photo(url);
       medias.push(image);
