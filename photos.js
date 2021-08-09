@@ -181,7 +181,9 @@ async function layout(medias) {
 }
 
 async function load() {
-  const response = await fetch("https://www.jvo.sh/photos_dev_content/");
+  const response = await fetch(
+    "https://www.jvo.sh/photos_dev_content/photos.json"
+  );
   const json = await response.json();
 
   const medias = [];

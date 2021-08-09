@@ -15,3 +15,6 @@ for IMG in "${DIR}"/*; do
     fi
   fi
 done
+
+echo "Caching photos json..."
+curl -s https://www.jvo.sh/photos_dev_content/ > "${DIR}/photos.json"
