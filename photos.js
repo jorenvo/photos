@@ -185,6 +185,9 @@ async function load() {
   const response = await fetch(`${endpoint}/photos.json`);
   const json = await response.json();
 
+  // show media from new to old
+  json.reverse();
+
   const medias = [];
   const load_promises = [];
   for (const media of json) {
