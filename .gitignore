@@ -4,3 +4,4 @@
 *.webp
 photos_content
 .DS_Store
+auxiliary/photos.db
