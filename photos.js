@@ -181,22 +181,20 @@ async function layout(medias) {
 }
 
 async function load() {
-  const endpoint = "https://www.jvo.sh/photos_content";
-  const response = await fetch(`${endpoint}/photos.json`);
-  const json = await response.json();
-
-  // show media from new to old
-  json.reverse();
+  const endpoint = "/photos_content";
+  const response = await fetch(`auxiliary/photos.db`);
+  const media_names = await response.text();
 
   const medias = [];
   const load_promises = [];
-  for (const media of json) {
-    const url = `${endpoint}/${media.name}`;
-    if (media.name.includes("_low_thumb")) {
+  for (const media_name of media_names.split("\n")) {
+    console.log(media_name);
+    const url = `${endpoint}/${media_name}`;
+    if (media_name.includes("_low_thumb")) {
       const image = new Photo(url);
       medias.push(image);
       load_promises.push(image.load());
-    } else if (media.name.includes(".mp4")) {
+    } else if (media_name.includes(".mp4")) {
       const video = new Video(url);
       medias.push(video);
       load_promises.push(video.load());
