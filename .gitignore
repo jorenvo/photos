@@ -3,3 +3,4 @@
 *.jpg
 *.webp
 photos_content
+.DS_Store
