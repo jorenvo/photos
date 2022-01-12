@@ -114,6 +114,9 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.  */
     // other tags
     0xa005: "InteroperabilityIFDPointer",
     0xa420: "ImageUniqueID", // Identifier assigned uniquely to each image
+
+    // jvo: this is really a TiffTag but it's parsed as EXIF somehow
+    0xa434: "LensModel",
   });
 
   var TiffTags = (EXIF.TiffTags = {
