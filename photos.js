@@ -73,7 +73,7 @@ class Photo extends Media {
     }
 
     const a = document.createElement("a");
-    a.href = this.full_url;
+    a.href = `/view.html?url=${encodeURIComponent(this.full_url)}`;
     a.appendChild(this.img);
     this.setDOM(a);
     return a;
