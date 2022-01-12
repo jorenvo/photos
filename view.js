@@ -1,5 +1,10 @@
 "use strict";
 
+function setText(id, text) {
+  const tag = document.getElementById(id);
+  tag.innerText = text;
+}
+
 const url = new URL(window.location.href);
 const image_location = url.searchParams.get("url");
 
@@ -12,12 +17,25 @@ image.onload = () => {
     const date = EXIF.getTag(this, "DateTimeOriginal");
     const model = EXIF.getTag(this, "Model");
     const lens = EXIF.getTag(this, "LensModel");
-
-    const aperture = EXIF.getTag(this, "ApertureValue");
-    const shutter_speed = EXIF.getTag(this, "ShutterSpeedValue");
+    const f_number = EXIF.getTag(this, "FNumber");
+    const exposure_time = EXIF.getTag(this, "ExposureTime");
     const iso = EXIF.getTag(this, "ISOSpeedRatings");
 
-    const makeAndModel = document.getElementById("exif");
-    makeAndModel.innerHTML += `${model} ${date} ${lens} ${aperture} ${shutter_speed} ${iso}`;
+    setText("exif-camera", model);
+    setText("exif-lens", lens);
+    setText("exif-aperture", `ƒ/${f_number}`);
+
+    let exposure_string = "";
+    if (exposure_time.denominator === 1) {
+      exposure_string = `${exposure_time.numerator}`;
+    } else {
+      exposure_string = `${exposure_time.numerator}/${exposure_time.denominator}`;
+    }
+
+    setText("exif-exposure", `${exposure_string}s`);
+    setText("exif-iso", iso);
+
+    let [year, month, day] = date.split(" ")[0].split(":");
+    setText("exif-date", `${year}/${month}/${day}`);
   });
 };
