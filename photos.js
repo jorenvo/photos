@@ -188,17 +188,15 @@ async function load() {
   const medias = [];
   const load_promises = [];
   for (const media_name of media_names.split("\n")) {
-    console.log(media_name);
-    const url = `${endpoint}/${media_name}`;
-    if (media_name.includes("_low_thumb")) {
-      const image = new Photo(url);
-      medias.push(image);
-      load_promises.push(image.load());
-    } else if (media_name.includes(".mp4")) {
-      const video = new Video(url);
-      medias.push(video);
-      load_promises.push(video.load());
+    if (media_name.length === 0) {
+      continue;
     }
+
+    const [name, _] = media_name.split(".");
+    const url = `${endpoint}/${name}_low_thumb.webp`;
+    const image = new Photo(url);
+    medias.push(image);
+    load_promises.push(image.load());
   }
 
   await Promise.all(load_promises);
