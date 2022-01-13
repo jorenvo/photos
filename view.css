@@ -1,7 +1,17 @@
+:root {
+  --white: rgb(230, 230, 230);
+}
+
 /* System Fonts as used by GitHub */
 body {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica,
     Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+  background-color: black;
+  color: var(--white);
+}
+
+.hide {
+  display: none !important;
 }
 
 .photo {
@@ -13,4 +23,25 @@ body {
 
 .exif-tag {
   padding-right: 0.5em;
+}
+
+#loading {
+  width: 50vw;
+  height: 90vh;
+  border-radius: 3px;
+
+  animation-duration: 0.7s;
+  animation-name: loading-blink;
+  animation-iteration-count: infinite;
+  animation-direction: alternate;
+}
+
+@keyframes loading-blink {
+  from {
+    background-color: rgb(190, 190, 190);
+  }
+
+  to {
+    background-color: var(--white);
+  }
 }
