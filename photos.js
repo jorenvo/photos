@@ -23,6 +23,10 @@ class Media {
   setDOM(dom) {
     this.dom = dom;
   }
+
+  rememberMedia(url) {
+    history.replaceState({}, "", `/?scroll=${encodeURIComponent(url)}`);
+  }
 }
 
 class Photo extends Media {
@@ -73,7 +77,10 @@ class Photo extends Media {
     }
 
     const a = document.createElement("a");
-    a.href = `/view.html?url=${encodeURIComponent(this.full_url)}`;
+    const href = `/view.html?url=${encodeURIComponent(this.full_url)}`;
+    a.href = href;
+    a.addEventListener("click", () => this.rememberMedia(href));
+
     a.appendChild(this.img);
     this.setDOM(a);
     return a;
@@ -231,16 +238,31 @@ function layoutIfWidthChanged(medias) {
   }, 200);
 }
 
+function scrollToLast() {
+  const url = new URL(window.location.href);
+  const href = url.searchParams.get("scroll");
+
+  if (href) {
+    const a = document.querySelector(`a[href="${href}"]`);
+
+    if (a) {
+      a.scrollIntoView();
+    }
+  }
+}
+
 load().then(async (medias) => {
   layout(medias);
   window.addEventListener("resize", () => layoutIfWidthChanged(medias));
   window.addEventListener("load", () => layoutIfWidthChanged(medias));
 
   await load_highres(medias);
+  scrollToLast();
 
   // The low res thumbnails are resized very small. This causes
   // rounding issues in their dimensions compared to their full
   // resolution counterparts. To fix this re-layout everything when we
   // have all the high res media.
   layout(medias);
+  scrollToLast();
 });
