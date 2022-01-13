@@ -38,6 +38,23 @@ function loadEXIF(image) {
   });
 }
 
+function wireZoom(image) {
+  // TODO: disable this on mobile, pinch-to-zoom works fine
+  image.addEventListener("click", (e) => {
+    zoom(image);
+  });
+}
+
+function zoom(image) {
+  if (image.classList.contains("zoom-moderate")) {
+    image.classList.replace("zoom-moderate", "zoom-full");
+  } else if (image.classList.contains("zoom-full")) {
+    image.classList.remove("zoom-full");
+  } else {
+    image.classList.add("zoom-moderate");
+  }
+}
+
 function show() {
   function toggle(e) {
     e.classList.toggle("hide");
@@ -47,7 +64,7 @@ function show() {
   document.querySelectorAll(".exif-tag").forEach(toggle);
 }
 
-async function view() {
+function view() {
   const url = new URL(window.location.href);
   const image_location = url.searchParams.get("url");
 
@@ -55,6 +72,7 @@ async function view() {
   image.src = image_location;
   image.onload = async () => {
     await loadEXIF(image);
+    wireZoom(image);
     show();
   };
 }

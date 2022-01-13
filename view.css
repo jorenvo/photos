@@ -21,6 +21,16 @@ body {
   margin: 0 auto;
 }
 
+.zoom-moderate {
+  max-width: 180vw;
+  max-height: 180vh;
+}
+
+.zoom-full {
+  max-width: unset;
+  max-height: unset;
+}
+
 .exif-tag {
   padding-right: 0.5em;
 }
