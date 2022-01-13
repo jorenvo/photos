@@ -12,30 +12,40 @@
 <body>
   <div id="loading" class="photo"></div>
   <img id="photo" class="photo hide" />
-  <span class="exif-tag hide">
-    <span>Camera: </span>
-    <span id="exif-camera"></span>
-  </span>
-  <span class="exif-tag hide">
-    <span>Lens: </span>
-    <span id="exif-lens"></span>
-  </span>
-  <span class="exif-tag hide">
-    <span>Aperture: </span>
-    <span id="exif-aperture"></span>
-  </span>
-  <span class="exif-tag hide">
-    <span>Exposure: </span>
-    <span id="exif-exposure"></span>
-  </span>
-  <span class="exif-tag hide">
-    <span>ISO: </span>
-    <span id="exif-iso"></span>
-  </span>
-  <span class="exif-tag hide">
-    <span>Date: </span>
-    <span id="exif-date"></span>
-  </span>
+
+  <div class="exif-row">
+    <span class="exif-tag hide">
+      <span>Camera: </span>
+      <span id="exif-camera"></span>
+    </span>
+    <span class="exif-tag hide">
+      <span>Lens: </span>
+      <span id="exif-lens"></span>
+    </span>
+  </div>
+
+  <div class="exif-row">
+    <span class="exif-tag hide">
+      <span>Aperture: </span>
+      <span id="exif-aperture"></span>
+    </span>
+    <span class="exif-tag hide">
+      <span>Exposure: </span>
+      <span id="exif-exposure"></span>
+    </span>
+    <span class="exif-tag hide">
+      <span>ISO: </span>
+      <span id="exif-iso"></span>
+    </span>
+  </div>
+
+  <div class="exif-row">
+    <span class="exif-tag hide">
+      <span>Date: </span>
+      <span id="exif-date"></span>
+    </span>
+  </div>
+
   <script src="libs/exif.js"></script>
   <script type="module" src="view.js"></script>
 </body>

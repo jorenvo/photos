@@ -31,8 +31,12 @@ body {
   max-height: unset;
 }
 
+.exif-row {
+  text-align: center;
+}
+
 .exif-tag {
-  padding-right: 0.5em;
+  padding-right: 0.35em;
 }
 
 #loading {
