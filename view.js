@@ -45,13 +45,49 @@ function wireZoom(image) {
   });
 }
 
+function calculateTranslation(image_size, viewport_size, pointer_pos) {
+  const max_x_translation = Math.max(0, (image_size - viewport_size) / 2);
+  const half_viewport_size = viewport_size / 2;
+  const ratio = (half_viewport_size - pointer_pos) / half_viewport_size;
+  const translation_mouse = max_x_translation * ratio;
+  const translation_center = image_size / 2 - viewport_size / 2;
+
+  return -translation_center + translation_mouse;
+}
+
+var suppressing_mouse_move = false;
+function onZoomMouseMove(image, e) {
+  if (suppressing_mouse_move) {
+    return;
+  }
+  suppressing_mouse_move = true;
+  setTimeout(() => (suppressing_mouse_move = false), 25);
+
+  const image_rect = image.getBoundingClientRect();
+  const x_translation = calculateTranslation(
+    image_rect.width,
+    window.innerWidth,
+    e.clientX
+  );
+  const y_translation = calculateTranslation(
+    image_rect.height,
+    window.innerHeight,
+    e.clientY
+  );
+
+  image.style.transform = `translate(${x_translation}px, ${y_translation}px)`;
+}
+
 function zoom(image) {
   if (image.classList.contains("zoom-moderate")) {
     image.classList.replace("zoom-moderate", "zoom-full");
   } else if (image.classList.contains("zoom-full")) {
     image.classList.remove("zoom-full");
   } else {
-    image.classList.add("zoom-moderate");
+    image.classList.remove("photo");
+    image.classList.add("smooth-transitions");
+
+    image.addEventListener("mousemove", (e) => onZoomMouseMove(image, e));
   }
 }
 

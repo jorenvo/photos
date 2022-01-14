@@ -1,5 +1,6 @@
 :root {
   --white: rgb(230, 230, 230);
+  --moderate-zoom-factor: 2;
 }
 
 /* System Fonts as used by GitHub */
@@ -21,14 +22,37 @@ body {
   margin: 0 auto;
 }
 
+.smooth-transitions {
+  transition-property: all;
+  transition-duration: 0.025s;
+}
+
 .zoom-moderate {
-  max-width: 180vw;
-  max-height: 180vh;
+  animation-duration: 0.3s;
+  animation-name: zoom-to-moderate;
+  animation-fill-mode: forwards;
+}
+
+@keyframes zoom-to-moderate {
+  to {
+    transform: scale(var(--moderate-zoom-factor));
+  }
 }
 
 .zoom-full {
-  max-width: unset;
-  max-height: unset;
+  animation-duration: 0.3s;
+  animation-name: zoom-to-full;
+  animation-fill-mode: forwards;
+}
+
+@keyframes zoom-to-full {
+  from {
+    transform: scale(var(--moderate-zoom-factor));
+  }
+
+  to {
+    transform: scale(4);
+  }
 }
 
 .exif-row {
