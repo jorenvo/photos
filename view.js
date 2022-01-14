@@ -85,6 +85,7 @@ function zoom(image) {
     image.classList.remove("zoom-full");
   } else {
     image.classList.remove("photo");
+    image.classList.add("zoom-moderate");
     image.classList.add("smooth-transitions");
 
     image.addEventListener("mousemove", (e) => onZoomMouseMove(image, e));

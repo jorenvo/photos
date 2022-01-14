@@ -28,6 +28,11 @@ body {
 }
 
 .zoom-moderate {
+  max-width: 200vw;
+  max-height: 200vh;
+}
+
+/* .zoom-moderate {
   animation-duration: 0.3s;
   animation-name: zoom-to-moderate;
   animation-fill-mode: forwards;
@@ -37,7 +42,7 @@ body {
   to {
     transform: scale(var(--moderate-zoom-factor));
   }
-}
+} */
 
 .zoom-full {
   animation-duration: 0.3s;
