@@ -27,7 +27,7 @@ body {
   transition-duration: 0.025s;
 }
 
-.zoom-moderate {
+.zoom {
   max-width: 200vw;
   max-height: 200vh;
 }
@@ -43,22 +43,6 @@ body {
     transform: scale(var(--moderate-zoom-factor));
   }
 } */
-
-.zoom-full {
-  animation-duration: 0.3s;
-  animation-name: zoom-to-full;
-  animation-fill-mode: forwards;
-}
-
-@keyframes zoom-to-full {
-  from {
-    transform: scale(var(--moderate-zoom-factor));
-  }
-
-  to {
-    transform: scale(4);
-  }
-}
 
 .exif-row {
   text-align: center;

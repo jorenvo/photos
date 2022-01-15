@@ -42,6 +42,7 @@ function wireZoom(image) {
   // TODO: disable this on mobile, pinch-to-zoom works fine
   image.addEventListener("click", (e) => {
     zoom(image);
+    debugger;
   });
 }
 
@@ -56,13 +57,14 @@ function calculateTranslation(image_size, viewport_size, pointer_pos) {
 }
 
 var suppressing_mouse_move = false;
-function onZoomMouseMove(image, e) {
+function onZoomMouseMove(e) {
   if (suppressing_mouse_move) {
     return;
   }
   suppressing_mouse_move = true;
   setTimeout(() => (suppressing_mouse_move = false), 25);
 
+  const image = e.target;
   const image_rect = image.getBoundingClientRect();
   const x_translation = calculateTranslation(
     image_rect.width,
@@ -75,20 +77,22 @@ function onZoomMouseMove(image, e) {
     e.clientY
   );
 
+  console.log("transform");
   image.style.transform = `translate(${x_translation}px, ${y_translation}px)`;
 }
 
 function zoom(image) {
-  if (image.classList.contains("zoom-moderate")) {
-    image.classList.replace("zoom-moderate", "zoom-full");
-  } else if (image.classList.contains("zoom-full")) {
-    image.classList.remove("zoom-full");
+  if (image.classList.contains("zoom")) {
+    image.removeEventListener("mousemove", onZoomMouseMove);
+    image.classList.add("photo");
+    image.classList.remove("zoom");
+    image.classList.remove("smooth-transitions");
+    image.style.transform = "";
   } else {
     image.classList.remove("photo");
-    image.classList.add("zoom-moderate");
+    image.classList.add("zoom");
     image.classList.add("smooth-transitions");
-
-    image.addEventListener("mousemove", (e) => onZoomMouseMove(image, e));
+    image.addEventListener("mousemove", onZoomMouseMove);
   }
 }
 
