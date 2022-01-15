@@ -3,12 +3,20 @@
   --moderate-zoom-factor: 2;
 }
 
+/* always take into account the url bar on Android/iOS:
+   https://developers.google.com/web/updates/2016/12/url-bar-resizing */
+html,
+body {
+  height: 100%;
+}
+
 /* System Fonts as used by GitHub */
 body {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica,
     Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
   background-color: black;
   color: var(--white);
+  overflow: hidden;
 }
 
 .hide {
@@ -17,19 +25,24 @@ body {
 
 .photo {
   display: block; /* so we can center */
-  max-width: 90vw;
-  max-height: 90vh;
+  max-width: 90%;
+  max-height: 90%;
   margin: 0 auto;
 }
 
 .smooth-transitions {
-  transition-property: all;
+  transition-property: transform;
   transition-duration: 0.025s;
 }
 
 .zoom {
-  max-width: 200vw;
-  max-height: 200vh;
+  max-width: 120%;
+  max-height: 120%;
+}
+
+.smooth-zoom {
+  transition-property: max-width, max-height;
+  transition-duration: 0.75s;
 }
 
 /* .zoom-moderate {

@@ -42,7 +42,6 @@ function wireZoom(image) {
   // TODO: disable this on mobile, pinch-to-zoom works fine
   image.addEventListener("click", (e) => {
     zoom(image);
-    debugger;
   });
 }
 
@@ -85,14 +84,19 @@ function zoom(image) {
   if (image.classList.contains("zoom")) {
     image.removeEventListener("mousemove", onZoomMouseMove);
     image.classList.add("photo");
+    image.classList.remove("smooth-zoom");
     image.classList.remove("zoom");
-    image.classList.remove("smooth-transitions");
     image.style.transform = "";
   } else {
     image.classList.remove("photo");
+    image.classList.add("smooth-zoom");
     image.classList.add("zoom");
-    image.classList.add("smooth-transitions");
-    image.addEventListener("mousemove", onZoomMouseMove);
+
+    image.addEventListener("transitionend", () => {
+      image.classList.replace("smooth-zoom", "smooth-transitions");
+    });
+    // image.classList.add("smooth-transitions");
+    // image.addEventListener("mousemove", onZoomMouseMove);
   }
 }
 
