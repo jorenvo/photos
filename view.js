@@ -1,6 +1,6 @@
 "use strict";
 
-const zoom_factor = 150 / 90; // TODO calculate from CSS?
+const zoom_factor = 2; // TODO calculate from CSS?
 
 function setText(id, text) {
   const tag = document.getElementById(id);
