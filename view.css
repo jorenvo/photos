@@ -27,17 +27,16 @@ body {
   display: block;
   max-width: 90%;
   max-height: 90%;
-  /* transform: translate(264px, 0px); */
 }
 
 .loading {
   margin: 0 auto;
 }
 
-.smooth-transitions {
+/* .smooth-transitions {
   transition-property: transform;
   transition-duration: 0.025s;
-}
+} */
 
 .photo-zoom {
   max-width: 150%;

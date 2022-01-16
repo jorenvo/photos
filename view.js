@@ -1,6 +1,6 @@
 "use strict";
 
-const zoom_factor = 1.66666; // TODO calculate from CSS?
+const zoom_factor = 150 / 90; // TODO calculate from CSS?
 
 function setText(id, text) {
   const tag = document.getElementById(id);
@@ -63,7 +63,7 @@ function onZoomMouseMove(e) {
     return;
   }
   suppressing_mouse_move = true;
-  setTimeout(() => (suppressing_mouse_move = false), 10);
+  setTimeout(() => (suppressing_mouse_move = false), 1_000 / 60); // todo requestAnimationFrame
 
   const image = e.target;
   const image_rect = image.getBoundingClientRect();
@@ -87,7 +87,7 @@ function stopSmoothZoomOut(e) {
 
 function stopSmoothZoomIn(e) {
   const image = e.target;
-  image.classList.replace("smooth-zoom", "smooth-transitions");
+  image.classList.replace("smooth-zoom", "smooth-transitions"); // TODO: remove smooth transitions
   image.addEventListener("mousemove", onZoomMouseMove);
 }
 
@@ -130,6 +130,13 @@ function zoom(e, image) {
   }
 }
 
+function onResize() {
+  const photo = document.getElementById("photo");
+  if (photo.classList.contains("photo-normal")) {
+    centerPhoto(photo.width);
+  }
+}
+
 function centerPhoto(width) {
   photo.style.transform = `translate(${
     (window.innerWidth - width) / 2
@@ -159,6 +166,7 @@ function view() {
   image.onload = async () => {
     await loadEXIF(image);
     wireZoom(image);
+    window.addEventListener("resize", onResize);
     show();
   };
 }
