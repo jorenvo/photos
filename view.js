@@ -1,5 +1,7 @@
 "use strict";
 
+const zoom_factor = 1.66666; // TODO calculate from CSS?
+
 function setText(id, text) {
   const tag = document.getElementById(id);
   tag.innerText = text;
@@ -41,7 +43,7 @@ function loadEXIF(image) {
 function wireZoom(image) {
   // TODO: disable this on mobile, pinch-to-zoom works fine
   image.addEventListener("click", (e) => {
-    zoom(image);
+    zoom(e, image);
   });
 }
 
@@ -61,51 +63,90 @@ function onZoomMouseMove(e) {
     return;
   }
   suppressing_mouse_move = true;
-  setTimeout(() => (suppressing_mouse_move = false), 25);
+  setTimeout(() => (suppressing_mouse_move = false), 10);
 
   const image = e.target;
   const image_rect = image.getBoundingClientRect();
   const x_translation = calculateTranslation(
     image_rect.width,
     window.innerWidth,
-    e.clientX
+    e.offsetX
   );
   const y_translation = calculateTranslation(
     image_rect.height,
     window.innerHeight,
-    e.clientY
+    e.offsetY
   );
-
-  console.log("transform");
   image.style.transform = `translate(${x_translation}px, ${y_translation}px)`;
 }
 
-function zoom(image) {
-  if (image.classList.contains("zoom")) {
-    image.removeEventListener("mousemove", onZoomMouseMove);
-    image.classList.add("photo");
-    image.classList.remove("smooth-zoom");
-    image.classList.remove("zoom");
-    image.style.transform = "";
-  } else {
-    image.classList.remove("photo");
-    image.classList.add("smooth-zoom");
-    image.classList.add("zoom");
+function stopSmoothZoomOut(e) {
+  const image = e.target;
+  image.classList.remove("smooth-zoom");
+}
 
-    image.addEventListener("transitionend", () => {
-      image.classList.replace("smooth-zoom", "smooth-transitions");
-    });
-    // image.classList.add("smooth-transitions");
-    // image.addEventListener("mousemove", onZoomMouseMove);
+function stopSmoothZoomIn(e) {
+  const image = e.target;
+  image.classList.replace("smooth-zoom", "smooth-transitions");
+  image.addEventListener("mousemove", onZoomMouseMove);
+}
+
+function initialZoomOnPointer(e, image) {
+  const image_rect = image.getBoundingClientRect();
+  const x_translation = calculateTranslation(
+    image_rect.width * zoom_factor,
+    window.innerWidth,
+    e.offsetX * zoom_factor
+  );
+  const y_translation = calculateTranslation(
+    image_rect.height * zoom_factor,
+    window.innerHeight,
+    e.offsetY * zoom_factor
+  );
+  console.log(e.offsetX, e.offsetY);
+  image.style.transform = `translate(${x_translation}px, ${y_translation}px)`;
+}
+
+function zoom(e, image) {
+  if (image.classList.contains("photo-zoom")) {
+    image.removeEventListener("mousemove", onZoomMouseMove);
+    image.removeEventListener("transitionend", stopSmoothZoomIn);
+
+    image.classList.remove("smooth-transitions");
+    image.classList.add("smooth-zoom");
+    image.classList.replace("photo-zoom", "photo-normal");
+
+    centerPhoto(image.getBoundingClientRect().width / zoom_factor);
+
+    image.addEventListener("transitionend", stopSmoothZoomOut);
+  } else {
+    image.removeEventListener("transitionend", stopSmoothZoomOut);
+
+    image.classList.add("smooth-zoom");
+    initialZoomOnPointer(e, image);
+    image.classList.replace("photo-normal", "photo-zoom");
+
+    image.addEventListener("transitionend", stopSmoothZoomIn);
   }
+}
+
+function centerPhoto(width) {
+  photo.style.transform = `translate(${
+    (window.innerWidth - width) / 2
+  }px, 0px)`;
 }
 
 function show() {
   function toggle(e) {
     e.classList.toggle("hide");
   }
+
   toggle(document.getElementById("loading"));
-  toggle(document.getElementById("photo"));
+
+  const photo = document.getElementById("photo");
+  toggle(photo);
+  centerPhoto(photo.getBoundingClientRect().width);
+
   document.querySelectorAll(".exif-tag").forEach(toggle);
 }
 

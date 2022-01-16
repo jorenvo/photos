@@ -23,10 +23,14 @@ body {
   display: none !important;
 }
 
-.photo {
-  display: block; /* so we can center */
+.photo-normal {
+  display: block;
   max-width: 90%;
   max-height: 90%;
+  /* transform: translate(264px, 0px); */
+}
+
+.loading {
   margin: 0 auto;
 }
 
@@ -35,14 +39,14 @@ body {
   transition-duration: 0.025s;
 }
 
-.zoom {
-  max-width: 120%;
-  max-height: 120%;
+.photo-zoom {
+  max-width: 150%;
+  max-height: 150%;
 }
 
 .smooth-zoom {
-  transition-property: max-width, max-height;
-  transition-duration: 0.75s;
+  transition-property: max-width, max-height, transform;
+  transition-duration: 0.5s;
 }
 
 /* .zoom-moderate {
