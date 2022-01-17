@@ -48,8 +48,10 @@ function wireZoom(image) {
 }
 
 function calculateTranslation(image_size, viewport_size, pointer_pos) {
+  const padding = 300;
+  image_size += padding;
+
   const max_translation = Math.max(0, image_size - viewport_size);
-  const half_viewport_size = viewport_size / 2;
   const ratio = pointer_pos / viewport_size - 0.5;
   const translation_mouse = max_translation * ratio;
   const translation_center = image_size / 2 - viewport_size / 2;
@@ -64,7 +66,7 @@ function calculateTranslation(image_size, viewport_size, pointer_pos) {
   // console.log("translation_center", translation_center);
   // console.log("--------");
 
-  return -translation_center + translation_mouse;
+  return -translation_center + translation_mouse + padding / 2;
 }
 
 var suppressing_mouse_move = false;
