@@ -44,8 +44,10 @@ body {
 }
 
 .smooth-zoom {
-  transition-property: max-width, max-height, transform;
-  transition-duration: 0.5s;
+  /* transform is delayed by 1ms to work around a Safari bug: 
+     https://stackoverflow.com/a/57994920 */
+  transition: max-width linear 0.2s, max-height linear 0.2s,
+    transform linear 0.2s 1ms;
 }
 
 /* .zoom-moderate {

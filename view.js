@@ -1,6 +1,6 @@
 "use strict";
 
-const zoom_factor = 2; // TODO calculate from CSS?
+const zoom_factor = 180 / 90; // TODO calculate from CSS?
 
 function setText(id, text) {
   const tag = document.getElementById(id);
@@ -48,7 +48,7 @@ function wireZoom(image) {
 }
 
 function calculateTranslation(image_size, viewport_size, pointer_pos) {
-  const padding = 300;
+  const padding = 0; // todo
   image_size += padding;
 
   const max_translation = Math.max(0, image_size - viewport_size);
@@ -56,17 +56,16 @@ function calculateTranslation(image_size, viewport_size, pointer_pos) {
   const translation_mouse = max_translation * ratio;
   const translation_center = image_size / 2 - viewport_size / 2;
 
-  // console.log("image_size", image_size);
-  // console.log("viewport_size", viewport_size);
-  // console.log("pointer_pos", pointer_pos);
-  // console.log("max_translation", max_translation);
-  // console.log("half_viewport_size", half_viewport_size);
-  // console.log("ratio", ratio);
-  // console.log("translation_mouse", translation_mouse);
-  // console.log("translation_center", translation_center);
-  // console.log("--------");
+  console.log("image_size", image_size);
+  console.log("viewport_size", viewport_size);
+  console.log("pointer_pos", pointer_pos);
+  console.log("max_translation", max_translation);
+  console.log("ratio", ratio);
+  console.log("translation_mouse", translation_mouse);
+  console.log("translation_center", translation_center);
+  console.log("--------");
 
-  return -translation_center + translation_mouse + padding / 2;
+  return -translation_center - translation_mouse + padding / 2;
 }
 
 var suppressing_mouse_move = false;
@@ -89,6 +88,7 @@ function onZoomMouseMove(e) {
     window.innerHeight,
     e.clientY
   );
+  console.log(e.clientX);
   image.style.transform = `translate(${x_translation}px, ${y_translation}px)`;
 }
 
@@ -108,14 +108,14 @@ function initialZoomOnPointer(e, image) {
   const x_translation = calculateTranslation(
     image_rect.width * zoom_factor,
     window.innerWidth,
-    e.offsetX * zoom_factor
+    e.clientX
   );
   const y_translation = calculateTranslation(
     image_rect.height * zoom_factor,
     window.innerHeight,
-    e.offsetY * zoom_factor
+    e.clientY
   );
-  console.log(e.offsetX, e.offsetY);
+  console.log(e.clientX);
   image.style.transform = `translate(${x_translation}px, ${y_translation}px)`;
 }
 
@@ -135,7 +135,7 @@ function zoom(e, image) {
     image.removeEventListener("transitionend", stopSmoothZoomOut);
 
     image.classList.add("smooth-zoom");
-    // initialZoomOnPointer(e, image);
+    initialZoomOnPointer(e, image);
     image.classList.replace("photo-normal", "photo-zoom");
 
     image.addEventListener("transitionend", stopSmoothZoomIn);
