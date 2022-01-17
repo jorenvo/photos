@@ -24,10 +24,10 @@ body {
 }
 
 .photo-normal {
-  display: block;
   width: 90%;
   height: 90%;
   object-fit: contain;
+  cursor: zoom-in;
 }
 
 .loading {
@@ -43,6 +43,7 @@ body {
   width: 180%;
   height: 180%;
   object-fit: contain;
+  cursor: zoom-out;
 }
 
 .smooth-zoom {
