@@ -48,6 +48,10 @@ function wireZoom() {
   global_photo.addEventListener("click", zoom);
 }
 
+function unWireZoom() {
+  global_photo.removeEventListener("click", zoom);
+}
+
 function calculateTranslation(image_size, viewport_size, pointer_pos) {
   const padding = 300;
   image_size += padding;
@@ -134,16 +138,19 @@ function wireSwapToLow() {
 
 function swapToHigh() {
   global_photo_high.src = "/_MGL1085.jpeg";
-  global_photo_high.onload = () => {
+  global_photo_high.decode().then(() => {
     global_photo.classList.add("hide");
     global_photo_high.style.transform = global_photo.style.transform;
     global_photo_high.classList.remove("hide");
-  };
+  });
 
   global_photo.removeEventListener("transitionend", swapToHigh);
 }
 
 function zoom(e) {
+  // Cancel high res if zoom level is about to change
+  global_photo_high.onload = undefined;
+
   if (global_photo.classList.contains("photo-zoom")) {
     unWireMouseMove();
 
@@ -156,12 +163,14 @@ function zoom(e) {
 
     global_photo.addEventListener("transitionend", stopSmoothZoom);
   } else {
+    unWireZoom();
     global_photo.classList.add("smooth-zoom");
     initialZoomOnPointer(e);
     global_photo.classList.replace("photo-normal", "photo-zoom");
     global_photo.addEventListener("transitionend", wireMouseMove);
     global_photo.addEventListener("transitionend", stopSmoothZoom);
     global_photo.addEventListener("transitionend", swapToHigh);
+    global_photo.addEventListener("transitionend", wireZoom);
   }
 }
 
