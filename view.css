@@ -25,8 +25,9 @@ body {
 
 .photo-normal {
   display: block;
-  max-width: 90%;
-  max-height: 90%;
+  width: 90%;
+  height: 90%;
+  object-fit: contain;
 }
 
 .loading {
@@ -39,15 +40,15 @@ body {
 } */
 
 .photo-zoom {
-  max-width: 180%;
-  max-height: 180%;
+  width: 180%;
+  height: 180%;
+  object-fit: contain;
 }
 
 .smooth-zoom {
   /* transform is delayed by 1ms to work around a Safari bug: 
      https://stackoverflow.com/a/57994920 */
-  transition: max-width linear 0.2s, max-height linear 0.2s,
-    transform linear 0.2s 1ms;
+  transition: width linear 0.2s, height linear 0.2s, transform linear 0.2s 1ms;
 }
 
 /* .zoom-moderate {

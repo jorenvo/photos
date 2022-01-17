@@ -48,7 +48,7 @@ function wireZoom(image) {
 }
 
 function calculateTranslation(image_size, viewport_size, pointer_pos) {
-  const padding = 0; // todo
+  const padding = 300;
   image_size += padding;
 
   const max_translation = Math.max(0, image_size - viewport_size);
@@ -56,14 +56,14 @@ function calculateTranslation(image_size, viewport_size, pointer_pos) {
   const translation_mouse = max_translation * ratio;
   const translation_center = image_size / 2 - viewport_size / 2;
 
-  console.log("image_size", image_size);
-  console.log("viewport_size", viewport_size);
-  console.log("pointer_pos", pointer_pos);
-  console.log("max_translation", max_translation);
-  console.log("ratio", ratio);
-  console.log("translation_mouse", translation_mouse);
-  console.log("translation_center", translation_center);
-  console.log("--------");
+  // console.log("image_size", image_size);
+  // console.log("viewport_size", viewport_size);
+  // console.log("pointer_pos", pointer_pos);
+  // console.log("max_translation", max_translation);
+  // console.log("ratio", ratio);
+  // console.log("translation_mouse", translation_mouse);
+  // console.log("translation_center", translation_center);
+  // console.log("--------");
 
   return -translation_center - translation_mouse + padding / 2;
 }
@@ -88,7 +88,6 @@ function onZoomMouseMove(e) {
     window.innerHeight,
     e.clientY
   );
-  console.log(e.clientX);
   image.style.transform = `translate(${x_translation}px, ${y_translation}px)`;
 }
 
@@ -115,7 +114,6 @@ function initialZoomOnPointer(e, image) {
     window.innerHeight,
     e.clientY
   );
-  console.log(e.clientX);
   image.style.transform = `translate(${x_translation}px, ${y_translation}px)`;
 }
 
