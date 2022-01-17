@@ -143,7 +143,6 @@ function swapToHigh() {
   global_photo.removeEventListener("transitionend", swapToHigh);
 }
 
-// TODO: replace image with global_photo
 function zoom(e) {
   if (global_photo.classList.contains("photo-zoom")) {
     unWireMouseMove();
