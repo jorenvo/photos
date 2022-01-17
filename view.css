@@ -34,11 +34,6 @@ body {
   margin: 0 auto;
 }
 
-/* .smooth-transitions {
-  transition-property: transform;
-  transition-duration: 0.025s;
-} */
-
 .photo-zoom {
   width: 180%;
   height: 180%;

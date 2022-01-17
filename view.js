@@ -1,16 +1,18 @@
 "use strict";
 
 const global_zoom_factor = 180 / 90; // TODO calculate from CSS?
+
 var global_photo = document.getElementById("photo");
+var global_photo_high = document.getElementById("photo-high");
 
 function setText(id, text) {
   const tag = document.getElementById(id);
   tag.innerText = text;
 }
 
-function loadEXIF(image) {
+function loadEXIF() {
   return new Promise(function (resolve, reject) {
-    EXIF.getData(image, function () {
+    EXIF.getData(global_photo, function () {
       console.log(EXIF.pretty(this));
 
       const date = EXIF.getTag(this, "DateTimeOriginal");
@@ -41,27 +43,9 @@ function loadEXIF(image) {
   });
 }
 
-function loadAndSwapHighRes() {
-  const photo_high = document.getElementById("photo-high");
-  photo_high.src = "/_MGL1085.jpeg";
-  photo_high.onload = () => {
-    global_photo.classList.add("hide");
-    photo_high.style.transform = global_photo.style.transform;
-    photo_high.classList.remove("hide");
-
-    global_photo.removeEventListener("mousemove", onZoomMouseMove);
-    global_photo = photo_high;
-    wireZoom(global_photo);
-    global_photo.addEventListener("mousemove", onZoomMouseMove);
-  };
-}
-
-function wireZoom(image) {
+function wireZoom() {
   // TODO: disable this on mobile, pinch-to-zoom works fine
-  image.addEventListener("click", (e) => {
-    zoom(e, image);
-    loadAndSwapHighRes();
-  });
+  global_photo.addEventListener("click", zoom);
 }
 
 function calculateTranslation(image_size, viewport_size, pointer_pos) {
@@ -87,13 +71,14 @@ function calculateTranslation(image_size, viewport_size, pointer_pos) {
 
 var suppressing_mouse_move = false;
 function onZoomMouseMove(e) {
+  const photo = e.target;
   if (suppressing_mouse_move) {
     return;
   }
   suppressing_mouse_move = true;
   setTimeout(() => (suppressing_mouse_move = false), 1_000 / 60); // todo requestAnimationFrame
 
-  const image_rect = global_photo.getBoundingClientRect();
+  const image_rect = photo.getBoundingClientRect();
   const x_translation = calculateTranslation(
     image_rect.width,
     window.innerWidth,
@@ -104,19 +89,27 @@ function onZoomMouseMove(e) {
     window.innerHeight,
     e.clientY
   );
-  global_photo.style.transform = `translate(${x_translation}px, ${y_translation}px)`;
+  photo.style.transform = `translate(${x_translation}px, ${y_translation}px)`;
 }
 
-function stopSmoothZoomOut() {
+function stopSmoothZoom(e) {
   global_photo.classList.remove("smooth-zoom");
+  e.target.removeEventListener("transitionend", stopSmoothZoom);
 }
 
-function stopSmoothZoomIn() {
+function unWireMouseMove() {
+  global_photo.removeEventListener("mousemove", onZoomMouseMove);
+  global_photo_high.removeEventListener("mousemove", onZoomMouseMove);
+}
+
+function wireMouseMove(e) {
   global_photo.addEventListener("mousemove", onZoomMouseMove);
+  global_photo_high.addEventListener("mousemove", onZoomMouseMove);
+  e.target.removeEventListener("transitionend", wireMouseMove);
 }
 
-function initialZoomOnPointer(e, image) {
-  const image_rect = image.getBoundingClientRect();
+function initialZoomOnPointer(e) {
+  const image_rect = global_photo.getBoundingClientRect();
   const x_translation = calculateTranslation(
     image_rect.width * global_zoom_factor,
     window.innerWidth,
@@ -127,29 +120,49 @@ function initialZoomOnPointer(e, image) {
     window.innerHeight,
     e.clientY
   );
-  image.style.transform = `translate(${x_translation}px, ${y_translation}px)`;
+  global_photo.style.transform = `translate(${x_translation}px, ${y_translation}px)`;
 }
 
-function zoom(e, image) {
-  if (image.classList.contains("photo-zoom")) {
-    image.removeEventListener("mousemove", onZoomMouseMove);
-    image.removeEventListener("transitionend", stopSmoothZoomIn);
+function wireSwapToLow() {
+  global_photo_high.addEventListener("click", (e) => {
+    global_photo.style.transform = global_photo_high.style.transform;
+    global_photo_high.classList.add("hide");
+    global_photo.classList.remove("hide");
+    setTimeout(() => global_photo.click(), 0);
+  });
+}
 
-    image.classList.remove("smooth-transitions");
-    image.classList.add("smooth-zoom");
-    image.classList.replace("photo-zoom", "photo-normal");
+function swapToHigh() {
+  global_photo_high.src = "/_MGL1085.jpeg";
+  global_photo_high.onload = () => {
+    global_photo.classList.add("hide");
+    global_photo_high.style.transform = global_photo.style.transform;
+    global_photo_high.classList.remove("hide");
+  };
 
-    centerPhoto(image.getBoundingClientRect().width / global_zoom_factor);
+  global_photo.removeEventListener("transitionend", swapToHigh);
+}
 
-    image.addEventListener("transitionend", stopSmoothZoomOut);
+// TODO: replace image with global_photo
+function zoom(e) {
+  if (global_photo.classList.contains("photo-zoom")) {
+    unWireMouseMove();
+
+    global_photo.classList.add("smooth-zoom");
+    global_photo.classList.replace("photo-zoom", "photo-normal");
+
+    centerPhoto(
+      global_photo.getBoundingClientRect().width / global_zoom_factor
+    );
+
+    global_photo.addEventListener("transitionend", stopSmoothZoom);
   } else {
-    image.removeEventListener("transitionend", stopSmoothZoomOut);
-
-    image.classList.add("smooth-zoom");
-    initialZoomOnPointer(e, image);
-    image.classList.replace("photo-normal", "photo-zoom");
-
-    image.addEventListener("transitionend", stopSmoothZoomIn);
+    global_photo.classList.add("smooth-zoom");
+    initialZoomOnPointer(e);
+    global_photo.classList.replace("photo-normal", "photo-zoom");
+    global_photo.addEventListener("transitionend", wireMouseMove);
+    global_photo.addEventListener("transitionend", stopSmoothZoom);
+    global_photo.addEventListener("transitionend", swapToHigh);
   }
 }
 
@@ -184,8 +197,9 @@ function view() {
 
   global_photo.src = image_location;
   global_photo.onload = async () => {
-    await loadEXIF(global_photo);
-    wireZoom(global_photo);
+    await loadEXIF();
+    wireZoom();
+    wireSwapToLow();
     window.addEventListener("resize", onResize);
     show();
   };
