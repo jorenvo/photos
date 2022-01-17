@@ -1,6 +1,7 @@
 "use strict";
 
-const zoom_factor = 180 / 90; // TODO calculate from CSS?
+const global_zoom_factor = 180 / 90; // TODO calculate from CSS?
+var global_photo = document.getElementById("photo");
 
 function setText(id, text) {
   const tag = document.getElementById(id);
@@ -40,10 +41,26 @@ function loadEXIF(image) {
   });
 }
 
+function loadAndSwapHighRes() {
+  const photo_high = document.getElementById("photo-high");
+  photo_high.src = "/_MGL1085.jpeg";
+  photo_high.onload = () => {
+    global_photo.classList.add("hide");
+    photo_high.style.transform = global_photo.style.transform;
+    photo_high.classList.remove("hide");
+
+    global_photo.removeEventListener("mousemove", onZoomMouseMove);
+    global_photo = photo_high;
+    wireZoom(global_photo);
+    global_photo.addEventListener("mousemove", onZoomMouseMove);
+  };
+}
+
 function wireZoom(image) {
   // TODO: disable this on mobile, pinch-to-zoom works fine
   image.addEventListener("click", (e) => {
     zoom(e, image);
+    loadAndSwapHighRes();
   });
 }
 
@@ -76,8 +93,7 @@ function onZoomMouseMove(e) {
   suppressing_mouse_move = true;
   setTimeout(() => (suppressing_mouse_move = false), 1_000 / 60); // todo requestAnimationFrame
 
-  const image = e.target;
-  const image_rect = image.getBoundingClientRect();
+  const image_rect = global_photo.getBoundingClientRect();
   const x_translation = calculateTranslation(
     image_rect.width,
     window.innerWidth,
@@ -88,29 +104,26 @@ function onZoomMouseMove(e) {
     window.innerHeight,
     e.clientY
   );
-  image.style.transform = `translate(${x_translation}px, ${y_translation}px)`;
+  global_photo.style.transform = `translate(${x_translation}px, ${y_translation}px)`;
 }
 
-function stopSmoothZoomOut(e) {
-  const image = e.target;
-  image.classList.remove("smooth-zoom");
+function stopSmoothZoomOut() {
+  global_photo.classList.remove("smooth-zoom");
 }
 
-function stopSmoothZoomIn(e) {
-  const image = e.target;
-  image.classList.replace("smooth-zoom", "smooth-transitions"); // TODO: remove smooth transitions
-  image.addEventListener("mousemove", onZoomMouseMove);
+function stopSmoothZoomIn() {
+  global_photo.addEventListener("mousemove", onZoomMouseMove);
 }
 
 function initialZoomOnPointer(e, image) {
   const image_rect = image.getBoundingClientRect();
   const x_translation = calculateTranslation(
-    image_rect.width * zoom_factor,
+    image_rect.width * global_zoom_factor,
     window.innerWidth,
     e.clientX
   );
   const y_translation = calculateTranslation(
-    image_rect.height * zoom_factor,
+    image_rect.height * global_zoom_factor,
     window.innerHeight,
     e.clientY
   );
@@ -126,7 +139,7 @@ function zoom(e, image) {
     image.classList.add("smooth-zoom");
     image.classList.replace("photo-zoom", "photo-normal");
 
-    centerPhoto(image.getBoundingClientRect().width / zoom_factor);
+    centerPhoto(image.getBoundingClientRect().width / global_zoom_factor);
 
     image.addEventListener("transitionend", stopSmoothZoomOut);
   } else {
@@ -141,14 +154,13 @@ function zoom(e, image) {
 }
 
 function onResize() {
-  const photo = document.getElementById("photo");
-  if (photo.classList.contains("photo-normal")) {
-    centerPhoto(photo.width);
+  if (global_photo.classList.contains("photo-normal")) {
+    centerPhoto(global_photo.width);
   }
 }
 
 function centerPhoto(width) {
-  photo.style.transform = `translate(${
+  global_photo.style.transform = `translate(${
     (window.innerWidth - width) / 2
   }px, 0px)`;
 }
@@ -160,9 +172,8 @@ function show() {
 
   toggle(document.getElementById("loading"));
 
-  const photo = document.getElementById("photo");
-  toggle(photo);
-  centerPhoto(photo.getBoundingClientRect().width);
+  toggle(global_photo);
+  centerPhoto(global_photo.getBoundingClientRect().width);
 
   document.querySelectorAll(".exif-tag").forEach(toggle);
 }
@@ -171,11 +182,10 @@ function view() {
   const url = new URL(window.location.href);
   const image_location = url.searchParams.get("url");
 
-  const image = document.getElementById("photo");
-  image.src = image_location;
-  image.onload = async () => {
-    await loadEXIF(image);
-    wireZoom(image);
+  global_photo.src = image_location;
+  global_photo.onload = async () => {
+    await loadEXIF(global_photo);
+    wireZoom(global_photo);
     window.addEventListener("resize", onResize);
     show();
   };

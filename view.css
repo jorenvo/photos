@@ -52,18 +52,6 @@ body {
   transition: width linear 0.2s, height linear 0.2s, transform linear 0.2s 1ms;
 }
 
-/* .zoom-moderate {
-  animation-duration: 0.3s;
-  animation-name: zoom-to-moderate;
-  animation-fill-mode: forwards;
-}
-
-@keyframes zoom-to-moderate {
-  to {
-    transform: scale(var(--moderate-zoom-factor));
-  }
-} */
-
 .exif-row {
   text-align: center;
 }
