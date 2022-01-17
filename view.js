@@ -138,7 +138,7 @@ function wireSwapToLow() {
 
 function swapToHigh() {
   setTimeout(() => {
-    global_photo_high.src = "/_MGL1085.jpeg";
+    global_photo_high.src = global_photo.src.replace("_low", "");
     global_photo_high.decode().then(() => {
       global_photo.classList.add("hide");
       global_photo_high.style.transform = global_photo.style.transform;

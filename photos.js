@@ -34,6 +34,7 @@ class Photo extends Media {
     super();
     this.thumb_url = url;
     this.highres_thumb_url = url.replace("_low_thumb", "_thumb");
+    this.low_url = url.replace("_low_thumb", "_low").replace(".webp", ".jpeg");
     this.full_url = url.replace("_low_thumb", "").replace(".webp", ".jpeg");
   }
 
@@ -77,7 +78,7 @@ class Photo extends Media {
     }
 
     const a = document.createElement("a");
-    const href = `/view.html?url=${encodeURIComponent(this.full_url)}`;
+    const href = `/view.html?url=${encodeURIComponent(this.low_url)}`;
     a.href = href;
     a.addEventListener("click", () => this.rememberMedia(href));
 

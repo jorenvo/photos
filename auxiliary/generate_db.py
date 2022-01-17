@@ -16,6 +16,9 @@ def process(media_dir):
         if not (media_name.endswith(".jpg") or media_name.endswith(".jpeg")):
             continue
 
+        if "_low" in media_name:
+            continue
+
         media_path = os.path.join(media_dir, media_name)
         with open(media_path, "rb") as media_file:
             image = exif.Image(media_file)
