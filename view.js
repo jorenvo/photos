@@ -137,14 +137,16 @@ function wireSwapToLow() {
 }
 
 function swapToHigh() {
-  global_photo_high.src = "/_MGL1085.jpeg";
-  global_photo_high.decode().then(() => {
-    global_photo.classList.add("hide");
-    global_photo_high.style.transform = global_photo.style.transform;
-    global_photo_high.classList.remove("hide");
-  });
+  setTimeout(() => {
+    global_photo_high.src = "/_MGL1085.jpeg";
+    global_photo_high.decode().then(() => {
+      global_photo.classList.add("hide");
+      global_photo_high.style.transform = global_photo.style.transform;
+      global_photo_high.classList.remove("hide");
+    });
 
-  global_photo.removeEventListener("transitionend", swapToHigh);
+    global_photo.removeEventListener("transitionend", swapToHigh);
+  }, 50);
 }
 
 function zoom(e) {
