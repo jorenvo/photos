@@ -165,9 +165,13 @@ function wireSwapToLow() {
   });
 }
 
+function getHighResURI() {
+  return global_photo.src.replace("_low", "");
+}
+
 function swapToHigh() {
   setTimeout(() => {
-    global_photo_high.src = global_photo.src.replace("_low", "");
+    global_photo_high.src = getHighResURI();
     global_photo_high.decode().then(() => {
       global_photo.classList.add("hide");
 
@@ -235,6 +239,10 @@ function show() {
   document.querySelectorAll(".exif-tag").forEach(toggle);
 }
 
+function wireDownload() {
+  document.getElementById("download").href = getHighResURI();
+}
+
 function wirePinch() {
   document.addEventListener("touchstart", (e) => {
     if (e.touches.length === 2) {
@@ -250,6 +258,7 @@ function view() {
   global_photo.src = image_location;
   global_photo.onload = async () => {
     await loadEXIF();
+    wireDownload();
     wirePinch();
     wireZoom();
     wireSwapToLow();
