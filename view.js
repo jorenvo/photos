@@ -40,6 +40,9 @@ function setText(id, text) {
 
 function loadEXIF() {
   return new Promise(function (resolve, reject) {
+    // TODO: better to use the small thumbnail here because
+    // the library will re-download the whole image into an
+    // arraybuffer.
     EXIF.getData(global_photo, function () {
       console.log(EXIF.pretty(this));
 

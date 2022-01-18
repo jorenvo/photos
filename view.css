@@ -62,7 +62,7 @@ a {
 }
 
 #loading {
-  width: 50vw;
+  width: 90vw;
   height: 90vh;
   border-radius: 3px;
 
@@ -74,7 +74,7 @@ a {
 
 @keyframes loading-blink {
   from {
-    background-color: rgb(190, 190, 190);
+    background-color: rgb(150, 150, 150);
   }
 
   to {
