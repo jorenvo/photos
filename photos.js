@@ -25,7 +25,7 @@ class Media {
   }
 
   rememberMedia(url) {
-    history.replaceState({}, "", `/?scroll=${encodeURIComponent(url)}`);
+    history.replaceState({}, "", `/photos/?scroll=${encodeURIComponent(url)}`);
   }
 }
 
@@ -78,7 +78,7 @@ class Photo extends Media {
     }
 
     const a = document.createElement("a");
-    const href = `/view.html?url=${encodeURIComponent(this.low_url)}`;
+    const href = `/photos/view.html?url=${encodeURIComponent(this.low_url)}`;
     a.href = href;
     a.addEventListener("click", () => this.rememberMedia(href));
 
