@@ -3,8 +3,10 @@ set -euo pipefail
 
 DIR="${1}"
 
-for IMG in "${DIR}"/*; do
-  if [[ ! $IMG =~ "_thumb" ]] && [[ ! $IMG =~ ".mp4" ]] && [[ ! $IMG =~ ".json" ]]; then
+cd "${DIR}"
+
+for IMG in *; do
+  if [[ ! $IMG =~ "_thumb" ]] && [[ ! $IMG =~ "_low" ]] && [[ ! $IMG =~ ".mp4" ]] && [[ ! $IMG =~ ".json" ]]; then
     WITHOUT_EXT="${IMG%%.*}"
     LOW_NAME="${WITHOUT_EXT}_low.jpeg"
     THUMB_LOW_NAME="${WITHOUT_EXT}_low_thumb.webp"
