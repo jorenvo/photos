@@ -114,12 +114,12 @@ function onZoomMouseMove(e) {
   const image_rect = photo.getBoundingClientRect();
   const x_translation = calculateTranslation(
     image_rect.width,
-    window.innerWidth,
+    document.body.clientWidth,
     e.clientX
   );
   const y_translation = calculateTranslation(
     image_rect.height,
-    window.innerHeight,
+    document.body.clientHeight,
     e.clientY
   );
   photo.style.transform = `translate(${x_translation}px, ${y_translation}px)`;
@@ -145,12 +145,12 @@ function initialZoomOnPointer(e) {
   const image_rect = global_photo.getBoundingClientRect();
   const x_translation = calculateTranslation(
     image_rect.width * global_zoom_factor,
-    window.innerWidth,
+    document.body.clientWidth,
     e.clientX
   );
   const y_translation = calculateTranslation(
     image_rect.height * global_zoom_factor,
-    window.innerHeight,
+    document.body.clientHeight,
     e.clientY
   );
   global_photo.style.transform = `translate(${x_translation}px, ${y_translation}px)`;
@@ -218,7 +218,7 @@ function onResize() {
 
 function centerPhoto(width) {
   global_photo.style.transform = `translate(${
-    (window.innerWidth - width) / 2
+    (document.body.clientWidth - width) / 2
   }px, 0px)`;
 }
 
