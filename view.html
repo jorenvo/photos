@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>photo</title>
+  <link rel="stylesheet" href="reset.css" />
+  <link rel="stylesheet" href="view.css" />
+  <!-- <link rel="icon" href="favicon.png" type="image/x-icon" /> -->
+</head>
+
+<body>
+  <div id="loading" class="photo-normal loading"></div>
+  <img id="photo" class="photo-normal hide" />
+  <img id="photo-high" class="photo-zoom hide" />
+  <div class="exif-row">
+    <span class="exif-tag hide">
+      <span>Camera: </span>
+      <span id="exif-camera"></span>
+    </span>
+    <span class="exif-tag hide">
+      <span>Lens: </span>
+      <span id="exif-lens"></span>
+    </span>
+  </div>
+
+  <div class="exif-row">
+    <span class="exif-tag hide">
+      <span>Aperture: </span>
+      <span id="exif-aperture"></span>
+    </span>
+    <span class="exif-tag hide">
+      <span>Exposure: </span>
+      <span id="exif-exposure"></span>
+    </span>
+    <span class="exif-tag hide">
+      <span>ISO: </span>
+      <span id="exif-iso"></span>
+    </span>
+  </div>
+
+  <div class="exif-row">
+    <span class="exif-tag hide">
+      <span>Date: </span>
+      <span id="exif-date"></span>
+    </span>
+    <span class="exif-tag hide">
+      <a id="download" download>Download</a>
+  </div>
+
+  <script src="libs/exif.js"></script>
+  <script type="module" src="view.js"></script>
+</body>
+
+</html>

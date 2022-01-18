@@ -23,6 +23,10 @@ class Media {
   setDOM(dom) {
     this.dom = dom;
   }
+
+  rememberMedia(url) {
+    history.replaceState({}, "", `/?scroll=${encodeURIComponent(url)}`);
+  }
 }
 
 class Photo extends Media {
@@ -30,6 +34,7 @@ class Photo extends Media {
     super();
     this.thumb_url = url;
     this.highres_thumb_url = url.replace("_low_thumb", "_thumb");
+    this.low_url = url.replace("_low_thumb", "_low").replace(".webp", ".jpeg");
     this.full_url = url.replace("_low_thumb", "").replace(".webp", ".jpeg");
   }
 
@@ -73,63 +78,13 @@ class Photo extends Media {
     }
 
     const a = document.createElement("a");
-    a.href = this.full_url;
+    const href = `/view.html?url=${encodeURIComponent(this.low_url)}`;
+    a.href = href;
+    a.addEventListener("click", () => this.rememberMedia(href));
+
     a.appendChild(this.img);
     this.setDOM(a);
     return a;
-  }
-}
-
-class Video extends Media {
-  constructor(url) {
-    super();
-    this.url = url;
-  }
-
-  async load() {
-    this.video = document.createElement("video");
-
-    // setAttribute instead of e.g. this.video.muted = "1", because that doesn't
-    // work for all these attributes.
-    this.video.setAttribute("src", this.url);
-    this.video.setAttribute("autoplay", "1");
-    this.video.setAttribute("loop", "1");
-    this.video.setAttribute("muted", "1");
-
-    this.video.muted = true; // This is needed to unblock autoplay in Firefox 90
-    this.video.setAttribute("playsinline", "1"); // Needed to play on iOS Safari
-
-    return new Promise((resolve, reject) => {
-      this.video.addEventListener("loadeddata", () => {
-        console.log(`Got new state: ${this.video.readyState}`);
-        console.log(
-          `Dimensions after loading: ${this.video.videoWidth}x${this.video.videoHeight}`
-        );
-        resolve();
-      });
-    });
-  }
-
-  async load_highres_thumbnail() {
-    return Promise.resolve();
-  }
-
-  loaded() {
-    return true;
-  }
-
-  getWidth() {
-    return this.video.videoWidth;
-  }
-
-  getHeight() {
-    return this.video.videoHeight;
-  }
-
-  toDOM(height) {
-    this.video.height = this.dom_height;
-    this.setDOM(this.video);
-    return this.video;
   }
 }
 
@@ -181,26 +136,22 @@ async function layout(medias) {
 }
 
 async function load() {
-  const endpoint = "https://www.jvo.sh/photos_content";
-  const response = await fetch(`${endpoint}/photos.json`);
-  const json = await response.json();
-
-  // show media from new to old
-  json.reverse();
+  const endpoint = "/photos_content";
+  const response = await fetch(`auxiliary/photos.db`);
+  const media_names = await response.text();
 
   const medias = [];
   const load_promises = [];
-  for (const media of json) {
-    const url = `${endpoint}/${media.name}`;
-    if (media.name.includes("_low_thumb")) {
-      const image = new Photo(url);
-      medias.push(image);
-      load_promises.push(image.load());
-    } else if (media.name.includes(".mp4")) {
-      const video = new Video(url);
-      medias.push(video);
-      load_promises.push(video.load());
+  for (const media_name of media_names.split("\n")) {
+    if (media_name.length === 0) {
+      continue;
     }
+
+    const [name, _] = media_name.split(".");
+    const url = `${endpoint}/${name}_low_thumb.webp`;
+    const image = new Photo(url);
+    medias.push(image);
+    load_promises.push(image.load());
   }
 
   await Promise.all(load_promises);
@@ -235,16 +186,31 @@ function layoutIfWidthChanged(medias) {
   }, 200);
 }
 
+function scrollToLast() {
+  const url = new URL(window.location.href);
+  const href = url.searchParams.get("scroll");
+
+  if (href) {
+    const a = document.querySelector(`a[href="${href}"]`);
+
+    if (a) {
+      a.scrollIntoView();
+    }
+  }
+}
+
 load().then(async (medias) => {
   layout(medias);
   window.addEventListener("resize", () => layoutIfWidthChanged(medias));
   window.addEventListener("load", () => layoutIfWidthChanged(medias));
 
   await load_highres(medias);
+  scrollToLast();
 
   // The low res thumbnails are resized very small. This causes
   // rounding issues in their dimensions compared to their full
   // resolution counterparts. To fix this re-layout everything when we
   // have all the high res media.
   layout(medias);
+  scrollToLast();
 });

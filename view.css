@@ -1,0 +1,83 @@
+:root {
+  --white: rgb(230, 230, 230);
+  --moderate-zoom-factor: 2;
+}
+
+/* always take into account the url bar on Android/iOS:
+   https://developers.google.com/web/updates/2016/12/url-bar-resizing */
+html,
+body {
+  width: 100%;
+  height: 100%;
+}
+
+/* System Fonts as used by GitHub */
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica,
+    Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+  background-color: black;
+  color: var(--white);
+  overflow: hidden;
+}
+
+.hide {
+  display: none !important;
+}
+
+.photo-normal {
+  width: 90%;
+  height: 90%;
+  object-fit: contain;
+  cursor: zoom-in;
+}
+
+.loading {
+  margin: 0 auto;
+}
+
+.photo-zoom {
+  width: 180%;
+  height: 180%;
+  object-fit: contain;
+  cursor: zoom-out;
+}
+
+.smooth-zoom {
+  /* transform is delayed by 1ms to work around a Safari bug: 
+     https://stackoverflow.com/a/57994920 */
+  transition: width linear 0.2s, height linear 0.2s, transform linear 0.2s 1ms;
+}
+
+.exif-row {
+  text-align: center;
+}
+
+.exif-tag {
+  padding-right: 0.35em;
+}
+
+a {
+  color: unset;
+  text-decoration: underline;
+}
+
+#loading {
+  width: 50vw;
+  height: 90vh;
+  border-radius: 3px;
+
+  animation-duration: 0.7s;
+  animation-name: loading-blink;
+  animation-iteration-count: infinite;
+  animation-direction: alternate;
+}
+
+@keyframes loading-blink {
+  from {
+    background-color: rgb(190, 190, 190);
+  }
+
+  to {
+    background-color: var(--white);
+  }
+}
