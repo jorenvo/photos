@@ -57,7 +57,7 @@ body {
 
 .nav-button {
   position: relative;
-  top: 5px;
+  top: 5px; /* todo: probably won't work well with all fonts */
   font-size: 40px;
 }
 
