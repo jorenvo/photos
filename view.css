@@ -1,5 +1,7 @@
 :root {
   --white: rgb(230, 230, 230);
+  --exif-tag-padding: 0.35em;
+  --nav-padding: 3em;
 }
 
 /* always take into account the url bar on Android/iOS:
@@ -52,13 +54,15 @@ body {
 }
 
 .exif-tag {
-  padding-right: 0.35em;
+  padding-right: var(--exif-tag-padding);
 }
 
-.nav-button {
-  position: relative;
-  top: 5px; /* todo: probably won't work well with all fonts */
-  font-size: 40px;
+.nav-button-prev {
+  padding-right: var(--nav-padding);
+}
+
+.nav-button-next {
+  padding-left: calc(var(--nav-padding) - var(--exif-tag-padding));
 }
 
 a {

@@ -239,7 +239,9 @@ function show() {
   toggle(global_photo);
   centerPhoto(global_photo.getBoundingClientRect().width);
 
-  document.querySelectorAll(".nav-button, .exif-tag").forEach(toggle);
+  document
+    .querySelectorAll(".nav-button-prev, .nav-button-next, .exif-tag")
+    .forEach(toggle);
 }
 
 function wireDownload() {
