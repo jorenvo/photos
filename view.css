@@ -55,6 +55,12 @@ body {
   padding-right: 0.35em;
 }
 
+.nav-button {
+  position: relative;
+  top: 5px;
+  font-size: 40px;
+}
+
 a {
   color: unset;
   text-decoration: underline;
