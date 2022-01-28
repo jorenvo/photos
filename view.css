@@ -1,6 +1,5 @@
 :root {
   --white: rgb(230, 230, 230);
-  --moderate-zoom-factor: 2;
 }
 
 /* always take into account the url bar on Android/iOS:
