@@ -21,6 +21,10 @@ body {
   overflow: hidden;
 }
 
+a {
+  color: unset;
+}
+
 .hide {
   display: none !important;
 }
@@ -57,17 +61,17 @@ body {
   padding-right: var(--exif-tag-padding);
 }
 
+a.nav-button-prev,
+a.nav-button-next {
+  text-decoration: unset;
+}
+
 .nav-button-prev {
   padding-right: var(--nav-padding);
 }
 
 .nav-button-next {
   padding-left: calc(var(--nav-padding) - var(--exif-tag-padding));
-}
-
-a {
-  color: unset;
-  text-decoration: underline;
 }
 
 #loading {

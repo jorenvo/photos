@@ -1,4 +1,4 @@
-import { endpoint, get_photo_names } from "./utils.js";
+import { get_photo_names, getViewUrl } from "./utils.js";
 
 /* To deal with browser rendering differences in images with
  * fractional dimensions we cut of these right pixels of all
@@ -78,7 +78,7 @@ class Photo extends Media {
     }
 
     const a = document.createElement("a");
-    const href = `/photos/view.html?url=${encodeURIComponent(this.low_url)}`;
+    const href = getViewUrl(this.full_url);
     a.href = href;
     a.addEventListener("click", () => this.rememberMedia(href));
 
@@ -146,7 +146,7 @@ async function load() {
     }
 
     const [name, _] = media_name.split(".");
-    const url = `${endpoint}/${name}_low_thumb.webp`;
+    const url = `${name}_low_thumb.webp`;
     const image = new Photo(url);
     medias.push(image);
     load_promises.push(image.load());
