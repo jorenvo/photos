@@ -1,4 +1,4 @@
-"use strict";
+import { endpoint, get_photo_names } from "./utils.js";
 
 /* To deal with browser rendering differences in images with
  * fractional dimensions we cut of these right pixels of all
@@ -136,13 +136,11 @@ async function layout(medias) {
 }
 
 async function load() {
-  const endpoint = "/photos_content";
-  const response = await fetch(`auxiliary/photos.db`);
-  const media_names = await response.text();
+  const photo_names = await get_photo_names();
 
   const medias = [];
   const load_promises = [];
-  for (const media_name of media_names.split("\n")) {
+  for (const media_name of photo_names) {
     if (media_name.length === 0) {
       continue;
     }
