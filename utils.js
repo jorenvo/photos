@@ -1,6 +1,6 @@
 const endpoint = "/photos_content";
 
-async function get_photo_names() {
+async function getPhotoNames() {
   const response = await fetch("auxiliary/photos.db");
   const photo_names = await response.text();
   return photo_names
@@ -13,4 +13,4 @@ function getViewUrl(image_high_url) {
   return `/photos/view.html?url=${encodeURIComponent(image_high_url)}`;
 }
 
-export { get_photo_names, getViewUrl };
+export { getPhotoNames, getViewUrl };

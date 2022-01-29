@@ -1,4 +1,4 @@
-import { get_photo_names, getViewUrl } from "./utils.js";
+import { getPhotoNames, getViewUrl } from "./utils.js";
 
 /* To deal with browser rendering differences in images with
  * fractional dimensions we cut of these right pixels of all
@@ -48,7 +48,7 @@ class Photo extends Media {
       .catch(() => console.error(`failed to decode ${this.thumb_url}`));
   }
 
-  async load_highres_thumbnail() {
+  async loadHighresThumbnail() {
     const highres_image = new Image();
     highres_image.src = this.highres_thumb_url;
 
@@ -88,7 +88,7 @@ class Photo extends Media {
   }
 }
 
-async function layout_row(mediaRow, height, calculatedWidth) {
+async function layoutRow(mediaRow, height, calculatedWidth) {
   if (!mediaRow.length) {
     return;
   }
@@ -125,18 +125,18 @@ async function layout(medias) {
 
       // Create new row only if there's >2 photos left. This avoids large photos at the end.
       if (row_height < MAX_ROW_HEIGHT_PX && i < medias.length - 3) {
-        layout_row(current_row, row_height, target_width_px);
+        layoutRow(current_row, row_height, target_width_px);
         current_row = [];
       }
     });
 
   if (current_row.length) {
-    layout_row(current_row, row_height, target_width_px);
+    layoutRow(current_row, row_height, target_width_px);
   }
 }
 
 async function load() {
-  const photo_names = await get_photo_names();
+  const photo_names = await getPhotoNames();
 
   const medias = [];
   const load_promises = [];
@@ -156,12 +156,12 @@ async function load() {
   return medias;
 }
 
-function load_highres(medias) {
+function loadHighres(medias) {
   let loads = [];
   for (const media of medias) {
     loads.push(
       media
-        .load_highres_thumbnail()
+        .loadHighresThumbnail()
         .then(() => media.getDOM().replaceWith(media.toDOM()))
     );
   }
@@ -202,7 +202,7 @@ load().then(async (medias) => {
   window.addEventListener("resize", () => layoutIfWidthChanged(medias));
   window.addEventListener("load", () => layoutIfWidthChanged(medias));
 
-  await load_highres(medias);
+  await loadHighres(medias);
   scrollToLast();
 
   // The low res thumbnails are resized very small. This causes

@@ -1,6 +1,6 @@
 "use strict";
 
-import { getViewUrl, get_photo_names } from "./utils.js";
+import { getViewUrl, getPhotoNames } from "./utils.js";
 
 const global_zoom_factor = 180 / 90; // TODO calculate from CSS?
 
@@ -258,7 +258,7 @@ function wirePinch() {
 }
 
 async function wireNav() {
-  const photo_names = await get_photo_names();
+  const photo_names = await getPhotoNames();
   const index = photo_names.findIndex((photo) => {
     return photo === image_high_url;
   });
