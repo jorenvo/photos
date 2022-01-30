@@ -1,9 +1,14 @@
 "use strict";
 
+import { getViewUrl, getPhotoNames } from "./utils.js";
+
 const global_zoom_factor = 180 / 90; // TODO calculate from CSS?
 
 var global_photo = document.getElementById("photo");
 var global_photo_high = document.getElementById("photo-high");
+
+var image_low_url = "";
+var image_high_url = "";
 
 function mobileAndTabletCheck() {
   let check = false;
@@ -168,13 +173,9 @@ function wireSwapToLow() {
   });
 }
 
-function getHighResURI() {
-  return global_photo.src.replace("_low", "");
-}
-
 function swapToHigh() {
   setTimeout(() => {
-    global_photo_high.src = getHighResURI();
+    global_photo_high.src = image_high_url;
     global_photo_high.decode().then(() => {
       global_photo.classList.add("hide");
 
@@ -239,11 +240,13 @@ function show() {
   toggle(global_photo);
   centerPhoto(global_photo.getBoundingClientRect().width);
 
-  document.querySelectorAll(".exif-tag").forEach(toggle);
+  document
+    .querySelectorAll(".nav-button-prev, .nav-button-next, .exif-tag")
+    .forEach(toggle);
 }
 
 function wireDownload() {
-  document.getElementById("download").href = getHighResURI();
+  document.getElementById("download").href = image_high_url;
 }
 
 function wirePinch() {
@@ -254,17 +257,45 @@ function wirePinch() {
   });
 }
 
+async function wireNav() {
+  const photo_names = await getPhotoNames();
+  const index = photo_names.findIndex((photo) => {
+    return photo === image_high_url;
+  });
+
+  const prevButton = document.querySelector(".nav-button-prev");
+  if (index > 0) {
+    prevButton.href = getViewUrl(photo_names[index - 1]);
+  } else {
+    prevButton.classList.add("hide");
+  }
+
+  const nextButton = document.querySelector(".nav-button-next");
+  if (index < photo_names.length - 1) {
+    nextButton.href = getViewUrl(photo_names[index + 1]);
+  } else {
+    nextButton.classList.add("hide");
+  }
+}
+
+function getLowUrl(image_high_url) {
+  const parts = image_high_url.split(".");
+  return `${parts[0]}_low.${parts[1]}`;
+}
+
 function view() {
   const url = new URL(window.location.href);
-  const image_location = url.searchParams.get("url");
+  image_high_url = url.searchParams.get("url");
+  image_low_url = getLowUrl(image_high_url);
 
-  global_photo.src = image_location;
+  global_photo.src = image_low_url;
   global_photo.onload = async () => {
     await loadEXIF();
     wireDownload();
     wirePinch();
     wireZoom();
     wireSwapToLow();
+    wireNav();
     if (!relyOnPinchToZoom()) {
       window.addEventListener("resize", onResize);
     }
