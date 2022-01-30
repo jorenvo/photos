@@ -263,16 +263,18 @@ async function wireNav() {
     return photo === image_high_url;
   });
 
+  const prevButton = document.querySelector(".nav-button-prev");
   if (index > 0) {
-    document.querySelector(".nav-button-prev").href = getViewUrl(
-      photo_names[index - 1]
-    );
+    prevButton.href = getViewUrl(photo_names[index - 1]);
+  } else {
+    prevButton.classList.add("hide");
   }
 
+  const nextButton = document.querySelector(".nav-button-next");
   if (index < photo_names.length - 1) {
-    document.querySelector(".nav-button-next").href = getViewUrl(
-      photo_names[index + 1]
-    );
+    nextButton.href = getViewUrl(photo_names[index + 1]);
+  } else {
+    nextButton.classList.add("hide");
   }
 }
 
