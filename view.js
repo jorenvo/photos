@@ -51,6 +51,9 @@ class Viewer {
     this.global_photo = document.getElementById("photo");
     this.global_photo_high = document.getElementById("photo-high");
 
+    this.prevButton = document.querySelector(".nav-button-prev");
+    this.nextButton = document.querySelector(".nav-button-next");
+
     this.zoom_factor = 180 / 90; // TODO: calculate from CSS?
     this.suppressing_mouse_move = false;
 
@@ -250,18 +253,16 @@ class Viewer {
       return photo === this.image_high_url;
     });
 
-    const prevButton = document.querySelector(".nav-button-prev"); // TODO: move to constructor
     if (index > 0) {
-      prevButton.href = getViewUrl(photo_names[index - 1]);
+      this.prevButton.href = getViewUrl(photo_names[index - 1]);
     } else {
-      prevButton.classList.add("hide");
+      this.prevButton.classList.add("hide");
     }
 
-    const nextButton = document.querySelector(".nav-button-next");
     if (index < photo_names.length - 1) {
-      nextButton.href = getViewUrl(photo_names[index + 1]);
+      this.nextButton.href = getViewUrl(photo_names[index + 1]);
     } else {
-      nextButton.classList.add("hide");
+      this.nextButton.classList.add("hide");
     }
   }
 
