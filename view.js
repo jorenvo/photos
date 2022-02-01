@@ -1,6 +1,6 @@
 "use strict";
 
-import { relyOnPinchToZoom, getPhotoNames } from "./utils.js";
+import { endpoint, relyOnPinchToZoom, getPhotoNames } from "./utils.js";
 
 function setText(id, text) {
   const tag = document.getElementById(id);
@@ -47,7 +47,7 @@ function loadEXIF(img) {
 
 class Viewer {
   constructor(image_high_url) {
-    this.image_high_url = image_high_url;
+    this.image_high_url = this._fullPhotoURL(image_high_url);
     this.image_low_url = undefined;
 
     this.global_photo = document.getElementById("photo");
@@ -72,6 +72,10 @@ class Viewer {
     if (!relyOnPinchToZoom()) {
       window.addEventListener("resize", this._onResize);
     }
+  }
+
+  _fullPhotoURL(url) {
+    return `${endpoint}/${url}`;
   }
 
   _bindFunctions() {
@@ -264,19 +268,19 @@ class Viewer {
   }
 
   _nextPhoto() {
-    this.image_high_url = this.nextPhoto;
+    this.image_high_url = this._fullPhotoURL(this.nextPhoto);
     this.start();
   }
 
   _prevPhoto() {
-    this.image_high_url = this.prevPhoto;
+    this.image_high_url = this._fullPhotoURL(this.prevPhoto);
     this.start();
   }
 
   async _setAdjacentPhotos() {
     const photo_names = await getPhotoNames();
     const index = photo_names.findIndex((photo) => {
-      return photo === this.image_high_url;
+      return this._fullPhotoURL(photo) === this.image_high_url;
     });
 
     if (index > 0) {
