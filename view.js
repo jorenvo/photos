@@ -267,6 +267,7 @@ class Viewer {
     });
   }
 
+  // TODO: set these new photo URLS in the current URL
   _nextPhoto() {
     this.image_high_url = this._fullPhotoURL(this.nextPhoto);
     this.start();
