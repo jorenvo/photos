@@ -1,6 +1,6 @@
 "use strict";
 
-import { relyOnPinchToZoom, getViewUrl, getPhotoNames } from "./utils.js";
+import { relyOnPinchToZoom, getPhotoNames } from "./utils.js";
 
 function setText(id, text) {
   const tag = document.getElementById(id);
@@ -9,12 +9,14 @@ function setText(id, text) {
 
 function loadEXIF(img) {
   return new Promise(function (resolve, reject) {
+    // The library caches the exifdata on an img tag. Since we change
+    // the src always force it to reload.
+    img.exifdata = undefined;
+
     // TODO: better to use the small thumbnail here because
     // the library will re-download the whole image into an
     // arraybuffer.
     EXIF.getData(img, function () {
-      console.log(EXIF.pretty(this));
-
       const date = EXIF.getTag(this, "DateTimeOriginal");
       const model = EXIF.getTag(this, "Model");
       const lens = EXIF.getTag(this, "LensModel");
@@ -44,9 +46,9 @@ function loadEXIF(img) {
 }
 
 class Viewer {
-  constructor(image_low_url, image_high_url) {
-    this.image_low_url = image_low_url;
+  constructor(image_high_url) {
     this.image_high_url = image_high_url;
+    this.image_low_url = undefined;
 
     this.global_photo = document.getElementById("photo");
     this.global_photo_high = document.getElementById("photo-high");
@@ -58,6 +60,18 @@ class Viewer {
     this.suppressing_mouse_move = false;
 
     this._bindFunctions();
+
+    this.global_photo.onload = this._onPhotoLoad;
+    this.prevButton.addEventListener("click", this._prevPhoto);
+    this.nextButton.addEventListener("click", this._nextPhoto);
+
+    this._wireDownload();
+    this._wirePinch();
+    this._wireZoom();
+    this._wireSwapToLow();
+    if (!relyOnPinchToZoom()) {
+      window.addEventListener("resize", this._onResize);
+    }
   }
 
   _bindFunctions() {
@@ -69,6 +83,8 @@ class Viewer {
     this._onResize = this._onResize.bind(this);
     this._wireZoom = this._wireZoom.bind(this);
     this._onPhotoLoad = this._onPhotoLoad.bind(this);
+    this._prevPhoto = this._prevPhoto.bind(this);
+    this._nextPhoto = this._nextPhoto.bind(this);
   }
 
   _wireZoom() {
@@ -221,18 +237,18 @@ class Viewer {
   }
 
   _show() {
-    function toggle(e) {
-      e.classList.toggle("hide");
+    function removeHide(e) {
+      e.classList.remove("hide");
     }
 
-    toggle(document.getElementById("loading"));
+    document.getElementById("loading").classList.add("hide");
 
-    toggle(this.global_photo);
+    removeHide(this.global_photo);
     this._centerPhoto(this.global_photo.getBoundingClientRect().width);
 
     document
       .querySelectorAll(".nav-button-prev, .nav-button-next, .exif-tag")
-      .forEach(toggle);
+      .forEach(removeHide);
   }
 
   _wireDownload() {
@@ -247,20 +263,30 @@ class Viewer {
     });
   }
 
-  async _wireNav() {
+  _nextPhoto() {
+    this.image_high_url = this.nextPhoto;
+    this.start();
+  }
+
+  _prevPhoto() {
+    this.image_high_url = this.prevPhoto;
+    this.start();
+  }
+
+  async _setAdjacentPhotos() {
     const photo_names = await getPhotoNames();
     const index = photo_names.findIndex((photo) => {
       return photo === this.image_high_url;
     });
 
     if (index > 0) {
-      this.prevButton.href = getViewUrl(photo_names[index - 1]);
+      this.prevPhoto = photo_names[index - 1];
     } else {
       this.prevButton.classList.add("hide");
     }
 
     if (index < photo_names.length - 1) {
-      this.nextButton.href = getViewUrl(photo_names[index + 1]);
+      this.nextPhoto = photo_names[index + 1];
     } else {
       this.nextButton.classList.add("hide");
     }
@@ -268,20 +294,13 @@ class Viewer {
 
   async _onPhotoLoad() {
     await loadEXIF(this.global_photo);
-    this._wireDownload();
-    this._wirePinch();
-    this._wireZoom();
-    this._wireSwapToLow();
-    this._wireNav();
-    if (!relyOnPinchToZoom()) {
-      window.addEventListener("resize", this._onResize);
-    }
+    this._setAdjacentPhotos();
     this._show();
   }
 
   start() {
+    this.image_low_url = getLowUrl(this.image_high_url);
     this.global_photo.src = this.image_low_url;
-    this.global_photo.onload = this._onPhotoLoad;
   }
 }
 
@@ -293,7 +312,7 @@ function getLowUrl(image_high_url) {
 function init() {
   const url = new URL(window.location.href);
   const image_high_url = url.searchParams.get("url");
-  const viewer = new Viewer(getLowUrl(image_high_url), image_high_url);
+  const viewer = new Viewer(image_high_url);
   viewer.start();
 }
 
