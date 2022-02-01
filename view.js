@@ -303,9 +303,13 @@ class Viewer {
     this._show();
   }
 
-  start() {
+  async start() {
     this.image_low_url = getLowUrl(this.image_high_url);
-    this.global_photo.src = this.image_low_url;
+
+    const response = await fetch(this.image_low_url);
+    const blob = await response.blob();
+
+    this.global_photo.src = URL.createObjectURL(blob);
   }
 }
 
