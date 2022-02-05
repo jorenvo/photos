@@ -1,6 +1,11 @@
 "use strict";
 
-import { endpoint, relyOnPinchToZoom, getPhotoNames } from "./utils.js";
+import {
+  endpoint,
+  relyOnPinchToZoom,
+  getPhotoNames,
+  getViewUrl,
+} from "./utils.js";
 
 function setText(id, text) {
   const tag = document.getElementById(id);
@@ -281,17 +286,19 @@ class Viewer {
     });
   }
 
-  // TODO: set these new photo URLS in the current URL
-  _nextPhoto() {
-    this.image_high_url = this._fullPhotoURL(this.nextPhoto);
+  _switchToPhoto(image_high_url) {
+    this.image_high_url = this._fullPhotoURL(image_high_url);
+    history.replaceState({}, "", getViewUrl(image_high_url));
     this._loadingScreen();
     this.start();
   }
 
+  _nextPhoto() {
+    this._switchToPhoto(this.nextPhoto);
+  }
+
   _prevPhoto() {
-    this.image_high_url = this._fullPhotoURL(this.prevPhoto);
-    this._loadingScreen();
-    this.start();
+    this._switchToPhoto(this.prevPhoto);
   }
 
   async _setAdjacentPhotos() {
