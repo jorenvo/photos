@@ -240,7 +240,21 @@ class Viewer {
     }px, 0px)`;
   }
 
-  _show() {
+  _loadingScreen() {
+    function addHide(e) {
+      e.classList.add("hide");
+    }
+
+    document.getElementById("loading").classList.remove("hide");
+
+    addHide(this.global_photo);
+
+    document
+      .querySelectorAll(".nav-button-prev, .nav-button-next, .exif-tag")
+      .forEach(addHide);
+  }
+
+  _photoScreen() {
     function removeHide(e) {
       e.classList.remove("hide");
     }
@@ -270,11 +284,13 @@ class Viewer {
   // TODO: set these new photo URLS in the current URL
   _nextPhoto() {
     this.image_high_url = this._fullPhotoURL(this.nextPhoto);
+    this._loadingScreen();
     this.start();
   }
 
   _prevPhoto() {
     this.image_high_url = this._fullPhotoURL(this.prevPhoto);
+    this._loadingScreen();
     this.start();
   }
 
@@ -300,7 +316,7 @@ class Viewer {
   async _onPhotoLoad() {
     await loadEXIF(this.global_photo);
     this._setAdjacentPhotos();
-    this._show();
+    this._photoScreen();
   }
 
   async start() {
