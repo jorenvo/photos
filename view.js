@@ -202,15 +202,11 @@ class Viewer {
           this.global_photo.style.transform;
         this.global_photo_high.classList.remove("hide");
       });
-
-      this.global_photo.removeEventListener("transitionend", this._swapToHigh);
     }, 50);
+    this.global_photo.removeEventListener("transitionend", this._swapToHigh);
   }
 
   _zoom(e) {
-    // Cancel high res if zoom level is about to change
-    this.global_photo_high.onload = undefined;
-
     if (this.global_photo.classList.contains("photo-zoom")) {
       this._unWireMouseMove();
 
