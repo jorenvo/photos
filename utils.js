@@ -28,10 +28,16 @@ function relyOnPinchToZoom() {
   return mobileAndTabletCheck() || isIpadOS();
 }
 
+let get_photos_name_cache = undefined;
 async function getPhotoNames() {
+  if (get_photos_name_cache) {
+    return get_photos_name_cache;
+  }
+
   const response = await fetch("auxiliary/photos.db");
   const photo_names = await response.text();
-  return photo_names.split("\n").filter((n) => n.length > 0);
+  get_photos_name_cache = photo_names.split("\n").filter((n) => n.length > 0);
+  return get_photos_name_cache;
 }
 
 function getViewUrl(image_high) {
