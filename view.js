@@ -54,6 +54,7 @@ class Viewer {
   constructor(image_high_url) {
     this.image_high_url = this._fullPhotoURL(image_high_url);
     this.image_low_url = undefined;
+    this.blob_cache = {};
 
     this.global_photo = document.getElementById("photo");
     this.global_photo_high = document.getElementById("photo-high");
@@ -289,16 +290,28 @@ class Viewer {
   _switchToPhoto(image_high_url) {
     this.image_high_url = this._fullPhotoURL(image_high_url);
     history.replaceState({}, "", getViewUrl(image_high_url));
-    this._loadingScreen();
-    this.start();
   }
 
-  _nextPhoto() {
+  async _nextPhoto() {
     this._switchToPhoto(this.nextPhoto);
+
+    if (!this.next_photo_is_loaded) {
+      this._loadingScreen();
+    }
+
+    const data = await this.next_photo_promise;
+    this.start(data["low_url"], data["blob"]);
   }
 
-  _prevPhoto() {
+  async _prevPhoto() {
     this._switchToPhoto(this.prevPhoto);
+
+    if (!this._is_cached(getLowUrl(this.prevPhoto))) {
+      this._loadingScreen();
+    }
+
+    const data = await this.preloadPhoto(this.prevPhoto);
+    this.start(data["low_url"], data["blob"]);
   }
 
   async _setAdjacentPhotos() {
@@ -320,18 +333,45 @@ class Viewer {
     }
   }
 
-  async _onPhotoLoad() {
-    await loadEXIF(this.global_photo);
-    this._setAdjacentPhotos();
-    this._photoScreen();
+  _is_cached(image_url) {
+    const full_url = this._fullPhotoURL(image_url);
+    return !!this.blob_cache[full_url];
   }
 
-  async start() {
-    this.image_low_url = getLowUrl(this.image_high_url);
+  async preloadPhoto(image_high_url) {
+    const image_low_url = getLowUrl(image_high_url);
 
-    const response = await fetch(this.image_low_url);
-    const blob = await response.blob();
+    console.log("fetching", this._fullPhotoURL(image_low_url));
 
+    const full_url = this._fullPhotoURL(image_low_url);
+    if (!this._is_cached(image_low_url)) {
+      const response = await fetch(full_url);
+      this.blob_cache[full_url] = await response.blob();
+      console.log("fetched", full_url);
+    }
+
+    return {
+      low_url: image_low_url,
+      high_url: image_high_url,
+      blob: this.blob_cache[full_url],
+    };
+  }
+
+  async _onPhotoLoad() {
+    await loadEXIF(this.global_photo);
+    await this._setAdjacentPhotos();
+    this._photoScreen();
+
+    // load next
+    this.next_photo_promise = this.preloadPhoto(this.nextPhoto).then((data) => {
+      this.next_photo_is_loaded = true;
+      return data;
+    });
+    this.next_photo_is_loaded = false;
+  }
+
+  async start(image_low_url, blob) {
+    this.image_low_url = image_low_url;
     this.global_photo.src = URL.createObjectURL(blob);
   }
 }
@@ -341,11 +381,13 @@ function getLowUrl(image_high_url) {
   return `${parts[0]}_low.${parts[1]}`;
 }
 
-function init() {
+async function init() {
   const url = new URL(window.location.href);
   const image_high_url = url.searchParams.get("url");
   const viewer = new Viewer(image_high_url);
-  viewer.start();
+
+  const data = await viewer.preloadPhoto(image_high_url);
+  viewer.start(data["low_url"], data["blob"]);
 }
 
 init();
