@@ -356,11 +356,11 @@ class Viewer {
     this._photoScreen();
 
     // load next
+    this.next_photo_is_loaded = false;
     this.next_photo_promise = this.preloadPhoto(this.nextPhoto).then((data) => {
       this.next_photo_is_loaded = true;
       return data;
     });
-    this.next_photo_is_loaded = false;
   }
 
   async start(image_low_url, blob) {
