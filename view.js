@@ -337,13 +337,10 @@ class Viewer {
   async preloadPhoto(image_high_url) {
     const image_low_url = getLowUrl(image_high_url);
 
-    console.log("fetching", this._fullPhotoURL(image_low_url));
-
     const full_url = this._fullPhotoURL(image_low_url);
     if (!this._is_cached(image_low_url)) {
       const response = await fetch(full_url);
       this.blob_cache[full_url] = await response.blob();
-      console.log("fetched", full_url);
     }
 
     return {
