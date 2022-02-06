@@ -62,7 +62,7 @@ class Viewer {
     this.prevButton = document.querySelector(".nav-button-prev");
     this.nextButton = document.querySelector(".nav-button-next");
 
-    this.zoom_factor = 180 / 90; // TODO: calculate from CSS?
+    this.zoom_factor = 180 / 85; // TODO: calculate from CSS?
     this.suppressing_mouse_move = false;
 
     this._bindFunctions();
