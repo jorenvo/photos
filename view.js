@@ -30,7 +30,7 @@ function loadEXIF(img) {
       const iso = EXIF.getTag(this, "ISOSpeedRatings");
 
       setText("exif-camera", model);
-      setText("exif-lens", lens);
+      setText("exif-lens", lens.replace("f/1.6", "")); // Make iPhone 12 back lens a bit shorter
       setText("exif-aperture", `ƒ/${f_number}`);
 
       let exposure_string = "";
