@@ -71,6 +71,11 @@ a {
   cursor: pointer;
 }
 
+.nav-button-prev,
+.nav-button-next {
+  padding: 0px 10px;
+}
+
 .nav-button-prev {
   margin-right: var(--nav-padding);
 }
