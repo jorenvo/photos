@@ -284,6 +284,7 @@ class Viewer {
   }
 
   _switchToPhoto(image_high_url) {
+    this.global_photo_high.classList.add("hide");
     this.image_high_url = this._fullPhotoURL(image_high_url);
     history.replaceState({}, "", getViewUrl(image_high_url));
   }
