@@ -45,21 +45,11 @@ class Photo extends Media {
   async tryHardToDecode(img) {
     // Chrome and Edge error with:
     // "DOMException: The source image cannot be decoded."
-    // This only triggers with a lot of requests in parallel. Until I can debug
-    // properly try to decode again which seems to work around the issue reliably.
+    // This only triggers with a lot of requests in parallel.
     try {
       await img.decode();
     } catch (e) {
-      console.log(
-        `${e} - first image decode of ${img.src} failed, trying again...`
-      );
-      try {
-        await img.decode();
-      } catch (e) {
-        console.log(
-          `${e} - second image decode of ${img.src} failed, giving up`
-        );
-      }
+      console.log(`${e} - image decode of ${img.src} failed`);
     }
   }
 
