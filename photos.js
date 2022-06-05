@@ -42,40 +42,39 @@ class Photo extends Media {
     this.full_url = url.replace("_low_thumb", "").replace(".webp", ".jpeg");
   }
 
+  async tryHardToDecode(img) {
+    // Chrome and Edge error with:
+    // "DOMException: The source image cannot be decoded."
+    // This only triggers with a lot of requests in parallel. Until I can debug
+    // properly try to decode again which seems to work around the issue reliably.
+    try {
+      await img.decode();
+    } catch (e) {
+      console.log(
+        `${e} - first image decode of ${img.src} failed, trying again...`
+      );
+      try {
+        await img.decode();
+      } catch (e) {
+        console.log(
+          `${e} - second image decode of ${img.src} failed, giving up`
+        );
+      }
+    }
+  }
+
   async load() {
     this.img = new Image();
     this.img.src = this.thumb_url;
 
-    // catch errors because Promise.all will bail on the first rejection
-    return this.img
-      .decode()
-      .catch(() => console.error(`failed to decode ${this.thumb_url}`));
+    await this.tryHardToDecode(this.img);
   }
 
   async loadHighresThumbnail() {
     const highres_image = new Image();
     highres_image.src = this.highres_thumb_url;
 
-    // catch errors because Promise.all will bail on the first rejection
-    try {
-      await highres_image.decode();
-    } catch (e) {
-      // Chrome and Edge error with:
-      // DOMException: The source image cannot be decoded.
-      // This only triggers with a lot of requests in parallel. Until I can debug
-      // properly try to decode again which seems to solve it.
-      console.log(
-        `${e} - first image decode of ${this.highres_thumb_url} failed, trying again...`
-      );
-      try {
-        await highres_image.decode();
-      } catch (e) {
-        console.log(
-          `${e} - second image decode of ${this.highres_thumb_url} failed, giving up`
-        );
-      }
-    }
-
+    await this.tryHardToDecode(highres_image);
     this.img = highres_image;
   }
 
