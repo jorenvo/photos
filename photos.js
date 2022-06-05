@@ -57,10 +57,26 @@ class Photo extends Media {
     highres_image.src = this.highres_thumb_url;
 
     // catch errors because Promise.all will bail on the first rejection
-    return highres_image
-      .decode()
-      .then(() => (this.img = highres_image))
-      .catch(() => console.error(`failed to decode ${this.highres_thumb_url}`));
+    try {
+      await highres_image.decode();
+    } catch (e) {
+      // Chrome and Edge error with:
+      // DOMException: The source image cannot be decoded.
+      // This only triggers with a lot of requests in parallel. Until I can debug
+      // properly try to decode again which seems to solve it.
+      console.log(
+        `${e} - first image decode of ${this.highres_thumb_url} failed, trying again...`
+      );
+      try {
+        await highres_image.decode();
+      } catch (e) {
+        console.log(
+          `${e} - second image decode of ${this.highres_thumb_url} failed, giving up`
+        );
+      }
+    }
+
+    this.img = highres_image;
   }
 
   loaded() {
