@@ -189,7 +189,10 @@ class Viewer {
     setTimeout(() => {
       this.global_photo_high.src = this.image_high_url;
       this.global_photo_high.decode().then(() => {
-        if (!this.global_photo.classList.contains("photo-zoom")) {
+        if (
+          !relyOnPinchToZoom() &&
+          !this.global_photo.classList.contains("photo-zoom")
+        ) {
           return; // Already zoomed out again
         }
 
