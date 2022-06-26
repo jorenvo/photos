@@ -211,7 +211,7 @@ load().then(async (medias) => {
   window.addEventListener("resize", () => layoutIfWidthChanged(medias));
   window.addEventListener("load", () => layoutIfWidthChanged(medias));
 
-  const CHUNK_SIZE = 6;
+  const CHUNK_SIZE = 6; // Browsers will do 6 simultaneous connections over HTTP 1.1
   for (let i = 0; i < medias.length; i += CHUNK_SIZE) {
     await loadHighres(medias.slice(i, i + CHUNK_SIZE));
   }
