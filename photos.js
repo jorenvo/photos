@@ -211,7 +211,11 @@ load().then(async (medias) => {
   window.addEventListener("resize", () => layoutIfWidthChanged(medias));
   window.addEventListener("load", () => layoutIfWidthChanged(medias));
 
-  await loadHighres(medias);
+  const CHUNK_SIZE = 8;
+  for (let i = 0; i < medias.length; i += CHUNK_SIZE) {
+    await loadHighres(medias.slice(i, i + CHUNK_SIZE));
+  }
+
   scrollToLast();
 
   // The low res thumbnails are resized very small. This causes
