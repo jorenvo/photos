@@ -485,16 +485,19 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.  */
       if (marker == 225) {
         if (debug) console.log("Found 0xFFE1 marker");
 
-        return readEXIFData(
+        let exif = readEXIFData(
           dataView,
           offset + 4,
           dataView.getUint16(offset + 2) - 2
         );
 
+        if (exif) {
+          return exif;
+        }
         // offset += 2 + file.getShortAt(offset+2, true);
-      } else {
-        offset += 2 + dataView.getUint16(offset + 2);
       }
+
+      offset += 2 + dataView.getUint16(offset + 2);
     }
   }
 
