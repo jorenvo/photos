@@ -187,7 +187,8 @@ class Viewer {
 
   _swapToHigh() {
     setTimeout(() => {
-      this.global_photo_high.src = this.image_high_url;
+      this.global_photo_high.setAttribute("src", "");
+      this.global_photo_high.setAttribute("src", this.image_high_url);
       this.global_photo_high.decode().then(() => {
         if (
           !relyOnPinchToZoom() &&
