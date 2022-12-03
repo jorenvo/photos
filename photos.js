@@ -116,7 +116,7 @@ async function layout(medias) {
   const target_width_px = window.innerWidth;
   const MAX_ROW_HEIGHT_PX = window.innerHeight / 2;
 
-  document.body.innerHTML = "";
+  // document.body.innerHTML = "";
 
   let current_row = [];
   let row_height = 0;
@@ -144,8 +144,13 @@ async function layout(medias) {
   }
 }
 
-async function load() {
-  const photo_names = await getPhotoNames();
+async function load(page) {
+  const PHOTOS_PER_PAGE = 10;
+  var photo_names = await getPhotoNames();
+
+  const offset = (page - 1) * PHOTOS_PER_PAGE;
+  photo_names = photo_names.slice(offset, offset + PHOTOS_PER_PAGE);
+  console.log(`offset: ${offset}`);
 
   const medias = [];
   const load_promises = [];
@@ -206,7 +211,35 @@ function scrollToLast() {
   }
 }
 
-load().then(async (medias) => {
+function pageLinks(url, page) {
+  const container = document.createElement("div");
+  container.classList.add("navigation");
+
+  const back = document.createElement("a");
+  back.innerText = "<";
+
+  if (page - 1 <= 0) {
+    back.classList.add("hide");
+  } else {
+    url.searchParams.set("page", page - 1);
+    back.setAttribute("href", url.href);
+  }
+
+  const forward = document.createElement("a");
+  forward.innerText = ">";
+  url.searchParams.set("page", page + 1);
+  forward.setAttribute("href", url.href);
+
+  container.appendChild(back);
+  container.appendChild(forward);
+  document.body.appendChild(container);
+}
+
+const url = new URL(window.location.href);
+var page = url.searchParams.get("page");
+page = page ? parseInt(page, 10) : 1;
+
+load(page).then(async (medias) => {
   layout(medias);
   window.addEventListener("resize", () => layoutIfWidthChanged(medias));
   window.addEventListener("load", () => layoutIfWidthChanged(medias));
@@ -224,4 +257,6 @@ load().then(async (medias) => {
   // have all the high res media.
   layout(medias);
   scrollToLast();
+
+  pageLinks(url, page);
 });
