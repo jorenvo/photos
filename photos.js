@@ -23,10 +23,6 @@ class Media {
   setDOM(dom) {
     this.dom = dom;
   }
-
-  rememberMedia(url) {
-    history.replaceState({}, "", `/photos/?scroll=${encodeURIComponent(url)}`);
-  }
 }
 
 class Photo extends Media {
@@ -89,7 +85,6 @@ class Photo extends Media {
     const a = document.createElement("a");
     const href = getViewUrl(this.full_url);
     a.href = href;
-    a.addEventListener("click", () => this.rememberMedia(href));
 
     a.appendChild(this.img);
     this.setDOM(a);
@@ -116,7 +111,7 @@ async function layout(medias) {
   const target_width_px = window.innerWidth;
   const MAX_ROW_HEIGHT_PX = window.innerHeight / 2;
 
-  // document.body.innerHTML = "";
+  document.body.innerHTML = "";
 
   let current_row = [];
   let row_height = 0;
@@ -142,10 +137,13 @@ async function layout(medias) {
   if (current_row.length) {
     layoutRow(current_row, row_height, target_width_px);
   }
+
+  pageLinks();
 }
 
-async function load(page) {
+async function load() {
   const PHOTOS_PER_PAGE = 10;
+  const page = getPage();
   var photo_names = await getPhotoNames();
 
   const offset = (page - 1) * PHOTOS_PER_PAGE;
@@ -198,20 +196,15 @@ function layoutIfWidthChanged(medias) {
   }, 200);
 }
 
-function scrollToLast() {
+function getPage() {
   const url = new URL(window.location.href);
-  const href = url.searchParams.get("scroll");
-
-  if (href) {
-    const a = document.querySelector(`a[href="${href}"]`);
-
-    if (a) {
-      a.scrollIntoView();
-    }
-  }
+  const page = url.searchParams.get("page");
+  return page ? parseInt(page, 10) : 1;
 }
 
-function pageLinks(url, page) {
+function pageLinks() {
+  const url = new URL(window.location.href);
+  const page = getPage();
   const container = document.createElement("div");
   container.classList.add("navigation");
 
@@ -235,11 +228,7 @@ function pageLinks(url, page) {
   document.body.appendChild(container);
 }
 
-const url = new URL(window.location.href);
-var page = url.searchParams.get("page");
-page = page ? parseInt(page, 10) : 1;
-
-load(page).then(async (medias) => {
+load().then(async (medias) => {
   layout(medias);
   window.addEventListener("resize", () => layoutIfWidthChanged(medias));
   window.addEventListener("load", () => layoutIfWidthChanged(medias));
@@ -249,14 +238,9 @@ load(page).then(async (medias) => {
     await loadHighres(medias.slice(i, i + CHUNK_SIZE));
   }
 
-  scrollToLast();
-
   // The low res thumbnails are resized very small. This causes
   // rounding issues in their dimensions compared to their full
   // resolution counterparts. To fix this re-layout everything when we
   // have all the high res media.
   layout(medias);
-  scrollToLast();
-
-  pageLinks(url, page);
 });
