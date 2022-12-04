@@ -2,7 +2,7 @@
 import exif
 import os
 import sys
-
+from PIL import Image
 
 DB_NAME = "photos.db"
 
@@ -27,7 +27,11 @@ def process(media_dir):
                 print(f"\n{media_name} does not have exif data")
                 continue
 
-            name_to_creation_date[media_name] = image.datetime_original
+            width, height = Image.open(media_file).size
+
+            name_to_creation_date[
+                f"{media_name},{width / height}"
+            ] = image.datetime_original
 
     print()
     contents = sorted(

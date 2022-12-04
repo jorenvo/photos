@@ -26,54 +26,24 @@ class Media {
 }
 
 class Photo extends Media {
-  constructor(url) {
+  constructor(url, aspect_ratio) {
     super();
 
     const url_with_endpoint = `${endpoint}/${url}`;
-    this.thumb_url = url_with_endpoint;
+    this.thumb_url = url_with_endpoint; // no longer used
     this.highres_thumb_url = url_with_endpoint.replace("_low_thumb", "_thumb");
     this.low_url = url_with_endpoint
       .replace("_low_thumb", "_low")
-      .replace(".webp", ".jpeg");
+      .replace(".webp", ".jpeg"); // no longer used
     this.full_url = url.replace("_low_thumb", "").replace(".webp", ".jpeg");
-  }
+    this.aspect_ratio = aspect_ratio;
 
-  async tryHardToDecode(img) {
-    // Chrome and Edge error with:
-    // "DOMException: The source image cannot be decoded."
-    // This only triggers with a lot of requests in parallel.
-    try {
-      await img.decode();
-    } catch (e) {
-      console.log(`${e} - image decode of ${img.src} failed`);
-    }
-  }
-
-  async load() {
     this.img = new Image();
-    this.img.src = this.thumb_url;
-
-    await this.tryHardToDecode(this.img);
+    this.img.src = this.highres_thumb_url;
   }
 
-  async loadHighresThumbnail() {
-    const highres_image = new Image();
-    highres_image.src = this.highres_thumb_url;
-
-    await this.tryHardToDecode(highres_image);
-    this.img = highres_image;
-  }
-
-  loaded() {
-    return !!this.img.naturalHeight;
-  }
-
-  getWidth() {
-    return this.img.naturalWidth;
-  }
-
-  getHeight() {
-    return this.img.naturalHeight;
+  getAspectRatio() {
+    return this.aspect_ratio;
   }
 
   toDOM() {
@@ -115,24 +85,20 @@ async function layout(medias) {
 
   let current_row = [];
   let row_height = 0;
-  medias
-    .filter((media) => media.loaded())
-    .forEach((media, i) => {
-      current_row.push(media);
+  medias.forEach((media, i) => {
+    current_row.push(media);
 
-      // w = x, h = 1
-      const aspect_ratios = current_row.map(
-        (media) => media.getWidth() / media.getHeight()
-      );
-      const total_width = aspect_ratios.reduce((prev, curr) => prev + curr, 0);
-      row_height = target_width_px / total_width;
+    // w = x, h = 1
+    const aspect_ratios = current_row.map((media) => media.getAspectRatio());
+    const total_width = aspect_ratios.reduce((prev, curr) => prev + curr, 0);
+    row_height = target_width_px / total_width;
 
-      // Create new row only if there's >2 photos left. This avoids large photos at the end.
-      if (row_height < MAX_ROW_HEIGHT_PX && i < medias.length - 3) {
-        layoutRow(current_row, row_height, target_width_px);
-        current_row = [];
-      }
-    });
+    // Create new row only if there's >2 photos left. This avoids large photos at the end.
+    if (row_height < MAX_ROW_HEIGHT_PX && i < medias.length - 3) {
+      layoutRow(current_row, row_height, target_width_px);
+      current_row = [];
+    }
+  });
 
   if (current_row.length) {
     layoutRow(current_row, row_height, target_width_px);
@@ -142,7 +108,7 @@ async function layout(medias) {
 }
 
 async function load() {
-  const PHOTOS_PER_PAGE = 10;
+  const PHOTOS_PER_PAGE = 9;
   const page = getPage();
   var photo_names = await getPhotoNames();
 
@@ -151,34 +117,19 @@ async function load() {
   console.log(`offset: ${offset}`);
 
   const medias = [];
-  const load_promises = [];
-  for (const media_name of photo_names) {
-    if (media_name.length === 0) {
+  for (const media_metadata of photo_names) {
+    if (media_metadata.length === 0) {
       continue;
     }
 
+    const [media_name, aspect_ratio] = media_metadata.split(",");
     const [name, _] = media_name.split(".");
     const url = `${name}_low_thumb.webp`;
-    const image = new Photo(url);
+    const image = new Photo(url, parseFloat(aspect_ratio));
     medias.push(image);
-    load_promises.push(image.load());
   }
 
-  await Promise.all(load_promises);
   return medias;
-}
-
-function loadHighres(medias) {
-  let loads = [];
-  for (const media of medias) {
-    loads.push(
-      media
-        .loadHighresThumbnail()
-        .then(() => media.getDOM().replaceWith(media.toDOM()))
-    );
-  }
-
-  return Promise.all(loads);
 }
 
 let prevWidthPx = window.innerWidth;
@@ -232,15 +183,4 @@ load().then(async (medias) => {
   layout(medias);
   window.addEventListener("resize", () => layoutIfWidthChanged(medias));
   window.addEventListener("load", () => layoutIfWidthChanged(medias));
-
-  const CHUNK_SIZE = 6; // Browsers will do 6 simultaneous connections over HTTP 1.1
-  for (let i = 0; i < medias.length; i += CHUNK_SIZE) {
-    await loadHighres(medias.slice(i, i + CHUNK_SIZE));
-  }
-
-  // The low res thumbnails are resized very small. This causes
-  // rounding issues in their dimensions compared to their full
-  // resolution counterparts. To fix this re-layout everything when we
-  // have all the high res media.
-  layout(medias);
 });

@@ -320,7 +320,9 @@ class Viewer {
   }
 
   async _setAdjacentPhotos() {
-    const photo_names = await getPhotoNames();
+    const photo_names = (await getPhotoNames()).map(
+      (metadata) => metadata.split(",")[0]
+    );
     const index = photo_names.findIndex((photo) => {
       return this._fullPhotoURL(photo) === this.image_high_url;
     });
