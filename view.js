@@ -1,11 +1,6 @@
 "use strict";
 
-import {
-  endpoint,
-  relyOnPinchToZoom,
-  getPhotoNames,
-  getViewUrl,
-} from "./utils.js";
+import { endpoint, relyOnPinchToZoom, getPhotoNames, getViewUrl } from "./utils.js";
 
 function setText(id, text) {
   const tag = document.getElementById(id);
@@ -131,12 +126,12 @@ class Viewer {
     const x_translation = this._calculateTranslation(
       image_rect.width,
       document.body.clientWidth,
-      e.clientX
+      e.clientX,
     );
     const y_translation = this._calculateTranslation(
       image_rect.height,
       document.body.clientHeight,
-      e.clientY
+      e.clientY,
     );
     photo.style.transform = `translate(${x_translation}px, ${y_translation}px)`;
   }
@@ -148,10 +143,7 @@ class Viewer {
 
   _unWireMouseMove() {
     this.global_photo.removeEventListener("mousemove", this._onZoomMouseMove);
-    this.global_photo_high.removeEventListener(
-      "mousemove",
-      this._onZoomMouseMove
-    );
+    this.global_photo_high.removeEventListener("mousemove", this._onZoomMouseMove);
   }
 
   _wireMouseMove(e) {
@@ -165,20 +157,19 @@ class Viewer {
     const x_translation = this._calculateTranslation(
       image_rect.width * this.zoom_factor,
       document.body.clientWidth,
-      e.clientX
+      e.clientX,
     );
     const y_translation = this._calculateTranslation(
       image_rect.height * this.zoom_factor,
       document.body.clientHeight,
-      e.clientY
+      e.clientY,
     );
     this.global_photo.style.transform = `translate(${x_translation}px, ${y_translation}px)`;
   }
 
   _wireSwapToLow() {
     this.global_photo_high.addEventListener("click", (e) => {
-      this.global_photo.style.transform =
-        this.global_photo_high.style.transform;
+      this.global_photo.style.transform = this.global_photo_high.style.transform;
       this.global_photo_high.classList.add("hide");
       this.global_photo.classList.remove("hide");
       setTimeout(() => this.global_photo.click(), 0);
@@ -190,24 +181,17 @@ class Viewer {
       this.global_photo_high.setAttribute("src", "");
       this.global_photo_high.setAttribute("src", this.image_high_url);
       this.global_photo_high.decode().then(() => {
-        if (
-          !relyOnPinchToZoom() &&
-          !this.global_photo.classList.contains("photo-zoom")
-        ) {
+        if (!relyOnPinchToZoom() && !this.global_photo.classList.contains("photo-zoom")) {
           return; // Already zoomed out again
         }
 
         this.global_photo.classList.add("hide");
 
         if (relyOnPinchToZoom()) {
-          this.global_photo_high.classList.replace(
-            "photo-zoom",
-            "photo-normal"
-          );
+          this.global_photo_high.classList.replace("photo-zoom", "photo-normal");
         }
 
-        this.global_photo_high.style.transform =
-          this.global_photo.style.transform;
+        this.global_photo_high.style.transform = this.global_photo.style.transform;
         this.global_photo_high.classList.remove("hide");
       });
     }, 50);
@@ -221,9 +205,7 @@ class Viewer {
       this.global_photo.classList.add("smooth-zoom");
       this.global_photo.classList.replace("photo-zoom", "photo-normal");
 
-      this._centerPhoto(
-        this.global_photo.getBoundingClientRect().width / this.zoom_factor
-      );
+      this._centerPhoto(this.global_photo.getBoundingClientRect().width / this.zoom_factor);
 
       this.global_photo.addEventListener("transitionend", this._stopSmoothZoom);
     } else {
@@ -259,9 +241,7 @@ class Viewer {
 
     addHide(this.global_photo);
 
-    document
-      .querySelectorAll(".nav-button-prev, .nav-button-next, .exif-tag")
-      .forEach(addHide);
+    document.querySelectorAll(".nav-button-prev, .nav-button-next, .exif-tag").forEach(addHide);
   }
 
   _photoScreen() {
@@ -274,9 +254,7 @@ class Viewer {
     removeHide(this.global_photo);
     this._centerPhoto(this.global_photo.getBoundingClientRect().width);
 
-    document
-      .querySelectorAll(".nav-button-prev, .nav-button-next, .exif-tag")
-      .forEach(removeHide);
+    document.querySelectorAll(".nav-button-prev, .nav-button-next, .exif-tag").forEach(removeHide);
   }
 
   _wireDownload() {
@@ -320,9 +298,7 @@ class Viewer {
   }
 
   async _setAdjacentPhotos() {
-    const photo_names = (await getPhotoNames()).map(
-      (metadata) => metadata.split(",")[0]
-    );
+    const photo_names = (await getPhotoNames()).map((metadata) => metadata.split(",")[0]);
     const index = photo_names.findIndex((photo) => {
       return this._fullPhotoURL(photo) === this.image_high_url;
     });

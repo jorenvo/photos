@@ -5,3 +5,4 @@
 photos_content
 .DS_Store
 auxiliary/photos.db
+node_modules
