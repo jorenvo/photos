@@ -8,7 +8,7 @@ function setText(id, text) {
 }
 
 function loadEXIF(img) {
-  return new Promise(function (resolve, reject) {
+  return new Promise(function (resolve) {
     // The library caches the exifdata on an img tag. Since we change
     // the src always force it to reload.
     img.exifdata = undefined;
@@ -28,7 +28,7 @@ function loadEXIF(img) {
       setText("exif-lens", lens.replace("f/1.6", "")); // Make iPhone 12 back lens a bit shorter
       setText("exif-aperture", `ƒ/${f_number}`);
 
-      let exposure_string = "";
+      let exposure_string;
       if (exposure_time.denominator === 1) {
         exposure_string = `${exposure_time.numerator}`;
       } else {
@@ -48,7 +48,6 @@ function loadEXIF(img) {
 class Viewer {
   constructor(image_high_url) {
     this.image_high_url = this._fullPhotoURL(image_high_url);
-    this.image_low_url = undefined;
     this.blob_cache = {};
 
     this.global_photo = document.getElementById("photo");
@@ -168,7 +167,7 @@ class Viewer {
   }
 
   _wireSwapToLow() {
-    this.global_photo_high.addEventListener("click", (e) => {
+    this.global_photo_high.addEventListener("click", () => {
       this.global_photo.style.transform = this.global_photo_high.style.transform;
       this.global_photo_high.classList.add("hide");
       this.global_photo.classList.remove("hide");
@@ -283,7 +282,7 @@ class Viewer {
     }
 
     const data = await this.next_photo_promise;
-    this.start(data["low_url"], data["blob"]);
+    await this.start(data["low_url"], data["blob"]);
   }
 
   async _prevPhoto() {
@@ -294,7 +293,7 @@ class Viewer {
     }
 
     const data = await this.preloadPhoto(this.prevPhoto);
-    this.start(data["low_url"], data["blob"]);
+    await this.start(data["low_url"], data["blob"]);
   }
 
   async _setAdjacentPhotos() {
@@ -346,8 +345,7 @@ class Viewer {
     this.next_photo_promise = this.preloadPhoto(this.nextPhoto);
   }
 
-  async start(image_low_url, blob) {
-    this.image_low_url = image_low_url;
+  async start(blob) {
     this.global_photo.src = URL.createObjectURL(blob);
   }
 }
@@ -363,7 +361,7 @@ async function init() {
   const viewer = new Viewer(image_high_url);
 
   const data = await viewer.preloadPhoto(image_high_url);
-  viewer.start(data["low_url"], data["blob"]);
+  await viewer.start(data["blob"]);
 }
 
-init();
+await init();
