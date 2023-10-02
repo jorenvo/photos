@@ -89,6 +89,17 @@ class Viewer {
     this._onPhotoLoad = this._onPhotoLoad.bind(this);
     this._prevPhoto = this._prevPhoto.bind(this);
     this._nextPhoto = this._nextPhoto.bind(this);
+    this._getSmoothZoomClass = this._getSmoothZoomClass.bind(this);
+  }
+
+  _getSmoothZoomClass() {
+    var isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+
+    if (isSafari) {
+      return "smooth-zoom-safari";
+    } else {
+      return "smooth-zoom";
+    }
   }
 
   _wireZoom() {
@@ -136,7 +147,7 @@ class Viewer {
   }
 
   _stopSmoothZoom(e) {
-    this.global_photo.classList.remove("smooth-zoom");
+    this.global_photo.classList.remove(this._getSmoothZoomClass());
     e.target.removeEventListener("transitionend", this._stopSmoothZoom);
   }
 
@@ -201,7 +212,7 @@ class Viewer {
     if (this.global_photo.classList.contains("photo-zoom")) {
       this._unWireMouseMove();
 
-      this.global_photo.classList.add("smooth-zoom");
+      this.global_photo.classList.add(this._getSmoothZoomClass());
       this.global_photo.classList.replace("photo-zoom", "photo-normal");
 
       this._centerPhoto(this.global_photo.getBoundingClientRect().width / this.zoom_factor);
@@ -209,7 +220,7 @@ class Viewer {
       this.global_photo.addEventListener("transitionend", this._stopSmoothZoom);
     } else {
       this._unWireZoom();
-      this.global_photo.classList.add("smooth-zoom");
+      this.global_photo.classList.add(this._getSmoothZoomClass());
       this._initialZoomOnPointer(e);
       this.global_photo.classList.replace("photo-normal", "photo-zoom");
       this.global_photo.addEventListener("transitionend", this._wireMouseMove);

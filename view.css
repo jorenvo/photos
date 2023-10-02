@@ -53,9 +53,13 @@ a {
 }
 
 .smooth-zoom {
-  /* transform is delayed by 1ms to work around a Safari bug: 
+  /* transform is delayed by 1ms to work around a bug:
      https://stackoverflow.com/a/57994920 */
   transition: width linear 0.2s, height linear 0.2s, transform linear 0.2s 1ms;
+}
+
+.smooth-zoom-safari {
+  transition: width linear 1ms, height linear 1ms, transform linear 1ms;
 }
 
 .exif-row {
