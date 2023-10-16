@@ -293,7 +293,7 @@ class Viewer {
     }
 
     const data = await this.next_photo_promise;
-    await this.start(data["low_url"], data["blob"]);
+    await this.start(data["blob"]);
   }
 
   async _prevPhoto() {
@@ -304,7 +304,7 @@ class Viewer {
     }
 
     const data = await this.preloadPhoto(this.prevPhoto);
-    await this.start(data["low_url"], data["blob"]);
+    await this.start(data["blob"]);
   }
 
   async _setAdjacentPhotos() {
